@@ -35,6 +35,7 @@ public class BoardManager : MonoBehaviour {
 	// Reset button
 	public Button Reset;
 
+    
     // Struct with the relevant parameters of an Item.
     // gameItem is the game object; 
     // centre is the location of the vertex; 
@@ -76,7 +77,7 @@ public class BoardManager : MonoBehaviour {
 	// 3. The instance prefab is uploaded
 	void SetInstance()
 	{
-		int randInstance = GameManager.instanceRandomization[GameManager.TotalTrial-1];
+		int randInstance = GameManager.tspRandomization[GameManager.TotalTrial-1];
 
 		//Display Max distance
 		Text Quest = GameObject.Find("Question").GetComponent<Text>();
@@ -155,6 +156,7 @@ public class BoardManager : MonoBehaviour {
 			}
 		} else
         {
+            Debug.Log("Skipped to next scene... I wonder why");
             GameManager.ChangeToNextScene(itemClicks, 0);
         }
 	}

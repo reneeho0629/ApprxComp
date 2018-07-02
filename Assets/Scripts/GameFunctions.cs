@@ -73,10 +73,11 @@ public class GameFunctions : MonoBehaviour {
 		//Activate Start Button and listener
 		start.SetActive (true);
 
+        BoardManager.keysON = true;
+
         Button startButton = GameObject.Find("Start").GetComponent<Button>();
         startButton.onClick.AddListener(StartClicked);
 
-        BoardManager.keysON = true;
 	}
 
 	//To pause press Control+P

@@ -76,10 +76,9 @@ public class InputOutputManager : MonoBehaviour {
         // Store parameters in a dictionary
 		var dict = new Dictionary<string, string>();
 
-        // Reading param.txt
-        using (StreamReader sr1 = new StreamReader(folderPathLoad + "param.txt"))
+        // Reading time_param.txt
+        using (StreamReader sr1 = new StreamReader(folderPathLoad + "time_param.txt"))
         {
-
             // (This loop reads every line until EOF or the first blank line.)
             string line1;
             while (!string.IsNullOrEmpty((line1 = sr1.ReadLine())))
@@ -96,6 +95,7 @@ public class InputOutputManager : MonoBehaviour {
         {
             // (This loop reads every line until EOF or the first blank line.)
             string line2;
+            
             while (!string.IsNullOrEmpty((line2 = sr2.ReadLine())))
             {
                 // Split each line around ':'
@@ -109,15 +109,15 @@ public class InputOutputManager : MonoBehaviour {
 
 	// Reads all instances from .txt files.
 	// The instances are stored as tspinstances structs in an array called "tspinstances"
-	private static GameManager.GameInstance[] LoadInstances(int numberOfInstances)
+	private static GameManager.TSPInstance[] LoadInstances(int numberOfInstances)
 	{
-		GameManager.GameInstance[] game_instances = new GameManager.GameInstance[numberOfInstances];
+		GameManager.TSPInstance[] game_instances = new GameManager.TSPInstance[numberOfInstances];
 
 		for (int k = 1; k <= numberOfInstances; k++) {
 			// create a dictionary where all the variables and definitions are strings
 			var dict = new Dictionary<string, string> ();
 			// Use streamreader to read the input files if there are lines to read
-			using (StreamReader sr = new StreamReader (folderPathLoadInstances + "i"+ k + ".txt")) {
+			using (StreamReader sr = new StreamReader (folderPathLoadInstances + "t"+ k + ".txt")) {
 				string line;
 				while (!string.IsNullOrEmpty ((line = sr.ReadLine ()))) {
 					string[] tmp = line.Split (new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
@@ -149,7 +149,7 @@ public class InputOutputManager : MonoBehaviour {
 			game_instances [k-1].coordinatesy = Array.ConvertAll (coordinatesyS.Substring (1, coordinatesyS.Length - 2).Split (','), float.Parse);
 
 			game_instances [k-1].distancevector = Array.ConvertAll (distancevectorS.Substring (1, distancevectorS.Length - 2).Split (','), int.Parse);
-			game_instances [k - 1].distancematrix = StringToMatrix(distancevectorS);
+			game_instances [k-1].distancematrix = StringToMatrix(distancevectorS);
 
 			game_instances [k-1].ncities = int.Parse (ncitiesS);
 			game_instances [k-1].maxdistance = int.Parse (maxdistanceS);
@@ -212,7 +212,7 @@ public class InputOutputManager : MonoBehaviour {
 		// Get the instance number for this trial (take the block number, subtract 1 because indexing starts at 0. Then multiply it
 		// by numberOfTrials (i.e. 10, 10 per block) and add the trial number of this block. Thus, the 2nd trial of block 2 will be
 		// instance number 12 overall) and add 1 because the instanceRandomization is linked to array numbering in C#, which starts at 0;
-		int instanceNum = GameManager.instanceRandomization [GameManager.TotalTrial - 1] + 1;
+		int instanceNum = GameManager.tspRandomization [GameManager.TotalTrial - 1] + 1;
 		int finaldistance = GameManager.Distancetravelled;
         
 		// what to save and the order in which to do so

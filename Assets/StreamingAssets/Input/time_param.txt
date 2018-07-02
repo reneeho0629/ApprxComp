@@ -1,0 +1,4 @@
+timeRest1:1
+timeRest2:30
+timeRest3:60
+timeQuestion:60
