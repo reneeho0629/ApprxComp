@@ -43,8 +43,9 @@ public class InputOutputManager : MonoBehaviour {
 		Dictionary<string, string> dict = LoadParameters ();
 		GameManager.AssignVariables(dict);
 
-		GameManager.game_instances = LoadInstances (GameManager.numberOfInstances);
-		SaveHeaders ();
+		GameManager.tsp_instances = LoadTSPInstances (GameManager.numberOfInstances);
+        GameManager.wcspp_instances = LoadWCSPPInstances(GameManager.numberOfInstances);
+        SaveHeaders ();
 	}
 
     // What does this do??????
@@ -107,11 +108,11 @@ public class InputOutputManager : MonoBehaviour {
 		return dict;
 	}
 
-	// Reads all instances from .txt files.
+	// Reads all TSP instances from .txt files.
 	// The instances are stored as tspinstances structs in an array called "tspinstances"
-	private static GameManager.TSPInstance[] LoadInstances(int numberOfInstances)
+	private static GameManager.TSPInstance[] LoadTSPInstances(int numberOfInstances)
 	{
-		GameManager.TSPInstance[] game_instances = new GameManager.TSPInstance[numberOfInstances];
+		GameManager.TSPInstance[] tsp_instances= new GameManager.TSPInstance[numberOfInstances];
 
 		for (int k = 1; k <= numberOfInstances; k++) {
 			// create a dictionary where all the variables and definitions are strings
@@ -144,30 +145,93 @@ public class InputOutputManager : MonoBehaviour {
 			dict.TryGetValue ("maxdistance", out maxdistanceS);
 
 			//convert (most of them) to integers, with variables and literals being arrays and the others single literals
-			game_instances [k-1].cities = Array.ConvertAll (citiesS.Substring (1, citiesS.Length - 2).Split (','), int.Parse);
-			game_instances [k-1].coordinatesx = Array.ConvertAll (coordinatesxS.Substring (1, coordinatesxS.Length - 2).Split (','), float.Parse);
-			game_instances [k-1].coordinatesy = Array.ConvertAll (coordinatesyS.Substring (1, coordinatesyS.Length - 2).Split (','), float.Parse);
+			tsp_instances [k-1].cities = Array.ConvertAll (citiesS.Substring (1, citiesS.Length - 2).Split (','), int.Parse);
+			tsp_instances [k-1].coordinatesx = Array.ConvertAll (coordinatesxS.Substring (1, coordinatesxS.Length - 2).Split (','), float.Parse);
+			tsp_instances [k-1].coordinatesy = Array.ConvertAll (coordinatesyS.Substring (1, coordinatesyS.Length - 2).Split (','), float.Parse);
 
-			game_instances [k-1].distancevector = Array.ConvertAll (distancevectorS.Substring (1, distancevectorS.Length - 2).Split (','), int.Parse);
-			game_instances [k-1].distancematrix = StringToMatrix(distancevectorS);
+			tsp_instances [k-1].distancevector = Array.ConvertAll (distancevectorS.Substring (1, distancevectorS.Length - 2).Split (','), int.Parse);
+			tsp_instances [k-1].distancematrix = StringToMatrix(distancevectorS);
 
-			game_instances [k-1].ncities = int.Parse (ncitiesS);
-			game_instances [k-1].maxdistance = int.Parse (maxdistanceS);
+			tsp_instances [k-1].ncities = int.Parse (ncitiesS);
+			tsp_instances [k-1].maxdistance = int.Parse (maxdistanceS);
 
-			dict.TryGetValue ("MZN", out game_instances [k - 1].id);
-			dict.TryGetValue ("param", out game_instances [k - 1].param);
-			dict.TryGetValue ("type", out game_instances [k - 1].type);
+			dict.TryGetValue ("MZN", out tsp_instances [k - 1].id);
+			dict.TryGetValue ("param", out tsp_instances [k - 1].param);
+			dict.TryGetValue ("type", out tsp_instances [k - 1].type);
 		}
 
-		return(game_instances);
+		return(tsp_instances);
 	}
 
-	/// <summary>
-	/// Saves the headers for both files (Trial Info and Time Stamps)
-	/// In the trial file it saves:  1. The participant ID. 2. Instance details.
-	/// In the TimeStamp file it saves: 1. The participant ID. 2.The time onset of the stopwatch from which the time stamps are measured. 3. the event types description.
-	/// </summary>
-	private static void SaveHeaders()
+    // Reads all WCSPP instances from .txt files.
+    // The instances are stored as tspinstances structs in an array called "tspinstances"
+    private static GameManager.WCSPPInstance[] LoadWCSPPInstances(int numberOfInstances)
+    {
+        GameManager.WCSPPInstance[] wcspp_instances = new GameManager.WCSPPInstance[numberOfInstances];
+
+        //for (int k = 1; k <= numberOfInstances; k++)
+        for (int k = 1; k <= 2; k++)
+        {
+            // create a dictionary where all the variables and definitions are strings
+            var dict = new Dictionary<string, string>();
+            // Use streamreader to read the input files if there are lines to read
+            using (StreamReader sr = new StreamReader(folderPathLoadInstances + "w" + k + ".txt"))
+            {
+                string line;
+                while (!string.IsNullOrEmpty((line = sr.ReadLine())))
+                {
+                    string[] tmp = line.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    // Add the key-value pair to the dictionary:
+                    dict.Add(tmp[0], tmp[1]);//int.Parse(dict[tmp[1]]);
+                }
+            }
+
+
+            // the following are all recorded as strings (hence the S at the end) 
+            string citiesS;
+            string coordinatesxS;
+            string coordinatesyS;
+            string distancevectorS;
+            string weightvectorS;
+            string ncitiesS;
+            string maxweightS;
+
+            //grab all of those parameters as strings
+            dict.TryGetValue("cities", out citiesS);
+            dict.TryGetValue("coordinatesx", out coordinatesxS);
+            dict.TryGetValue("coordinatesy", out coordinatesyS);
+            dict.TryGetValue("distancevector", out distancevectorS);
+            dict.TryGetValue("weightvector", out weightvectorS);
+            dict.TryGetValue("ncities", out ncitiesS);
+            dict.TryGetValue("maxweight", out maxweightS);
+
+            //convert (most of them) to integers, with variables and literals being arrays and the others single literals
+            wcspp_instances[k - 1].cities = Array.ConvertAll(citiesS.Substring(1, citiesS.Length - 2).Split(','), int.Parse);
+            wcspp_instances[k - 1].coordinatesx = Array.ConvertAll(coordinatesxS.Substring(1, coordinatesxS.Length - 2).Split(','), float.Parse);
+            wcspp_instances[k - 1].coordinatesy = Array.ConvertAll(coordinatesyS.Substring(1, coordinatesyS.Length - 2).Split(','), float.Parse);
+
+            wcspp_instances[k - 1].distancevector = Array.ConvertAll(distancevectorS.Substring(1, distancevectorS.Length - 2).Split(','), int.Parse);
+            wcspp_instances[k - 1].distancematrix = StringToMatrix(distancevectorS);
+
+            wcspp_instances[k - 1].weightvector = Array.ConvertAll(weightvectorS.Substring(1, weightvectorS.Length - 2).Split(','), int.Parse);
+            wcspp_instances[k - 1].weightmatrix = StringToMatrix(weightvectorS);
+
+            wcspp_instances[k - 1].ncities = int.Parse(ncitiesS);
+            wcspp_instances[k - 1].maxweight = int.Parse(maxweightS);
+
+            dict.TryGetValue("MZN", out wcspp_instances[k - 1].id);
+            dict.TryGetValue("param", out wcspp_instances[k - 1].param);
+            dict.TryGetValue("type", out wcspp_instances[k - 1].type);
+        }
+
+        return (wcspp_instances);
+    }
+    /// <summary>
+    /// Saves the headers for both files (Trial Info and Time Stamps)
+    /// In the trial file it saves:  1. The participant ID. 2. Instance details.
+    /// In the TimeStamp file it saves: 1. The participant ID. 2.The time onset of the stopwatch from which the time stamps are measured. 3. the event types description.
+    /// </summary>
+    private static void SaveHeaders()
 	{
 		// Trial Info file headers
 		string[] lines = new string[2];

@@ -88,7 +88,7 @@ public class GameManager : MonoBehaviour
     public static int Distancetravelled;
 
     // An array of all the instances, i.e importing everything using the structure below 
-    public static TSPInstance[] game_instances;
+    public static TSPInstance[] tsp_instances;
 
     // A struct that contains the parameters of each TSP instance
     public struct TSPInstance
@@ -107,10 +107,32 @@ public class GameManager : MonoBehaviour
 		public string param;
 	}
 
+    // An array of all the instances, i.e importing everything using the structure below 
+    public static WCSPPInstance[] wcspp_instances;
 
+    // A struct that contains the parameters of each TSP instance
+    public struct WCSPPInstance
+    {
+        public int[] cities;
+        public float[] coordinatesx;
+        public float[] coordinatesy;
 
-	// Use this for initialization
-	void Start () 
+        public int[,] distancematrix;
+        public int[] distancevector;
+
+        public int[,] weightmatrix;
+        public int[] weightvector;
+
+        public int ncities;
+        public int maxweight;
+
+        public string id;
+        public string type;
+        public string param;
+    }
+
+    // Use this for initialization
+    void Start () 
 	{
 		//Makes the GameManager a Singleton
 		if (gameManager == null) {

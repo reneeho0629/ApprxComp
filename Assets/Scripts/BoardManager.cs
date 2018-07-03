@@ -19,18 +19,21 @@ public class BoardManager : MonoBehaviour {
 	// Prefab of the Item interface configuration
 	public static GameObject LineItemPrefab;
 
-	// Current distance counter
+	// Current counters
 	public Text DistanceText;
-	public static int distanceTravelledValue;
+    public Text WeightText;
+    public static int distanceTravelledValue;
+    public static int weightValue;
 
-	//Coordinate vectors for this trial. ONLY INTEGERS allowed.
-	private float[] cox;
+    //Coordinate vectors for this trial. ONLY INTEGERS allowed.
+    private float[] cox;
 	private float[] coy;
 	private int[] cities;
 	private int[,] distances;
+    private int[,] weights;
 
-	// Should the key be working? Initially disabled
-	public static bool keysON = false;
+    // Should the key be working? Initially disabled
+    public static bool keysON = false;
 
 	// Reset button
 	public Button Reset;
@@ -81,11 +84,12 @@ public class BoardManager : MonoBehaviour {
         if (GameManager.problemName == 't'.ToString())
         {
             Debug.Log("Setting up TSP Instance: Block "+ (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial "+ GameManager.trial+"/" + GameManager.numberOfTrials+" , Total Trial "+ GameManager.TotalTrial);
-            int randInstance = GameManager.tspRandomization[GameManager.TotalTrial - 1];
+            // current instance
+            int currInstance = GameManager.tspRandomization[GameManager.TotalTrial - 1];
 
-            //Display Max distance
+            // Display Max distance
             Text Quest = GameObject.Find("Question").GetComponent<Text>();
-            Quest.text = "Max: " + GameManager.game_instances[randInstance].maxdistance + "km";
+            Quest.text = "Max: " + GameManager.tsp_instances[currInstance].maxdistance + "km";
 
             // Display current distance
             DistanceText = GameObject.Find("DistanceText").GetComponent<Text>();
@@ -95,12 +99,12 @@ public class BoardManager : MonoBehaviour {
             Reset.onClick.AddListener(ResetClicked);
 
             // Coordinate of the cities
-            cox = GameManager.game_instances[randInstance].coordinatesx;
-            coy = GameManager.game_instances[randInstance].coordinatesy;
+            cox = GameManager.tsp_instances[currInstance].coordinatesx;
+            coy = GameManager.tsp_instances[currInstance].coordinatesy;
             unitycoord = BoardFunctions.CoordinateConvertor(cox, coy);
 
-            cities = GameManager.game_instances[randInstance].cities;
-            distances = GameManager.game_instances[randInstance].distancematrix;
+            cities = GameManager.tsp_instances[currInstance].cities;
+            distances = GameManager.tsp_instances[currInstance].distancematrix;
 
 
             TSPItemPrefab = (GameObject)Resources.Load("TSPItem");
@@ -120,6 +124,50 @@ public class BoardManager : MonoBehaviour {
 		else if (GameManager.problemName == 'w'.ToString())
         {
             Debug.Log("Setting up WCSPP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
+            int currInstance = GameManager.wcsppRandomization[GameManager.TotalTrial - 1];
+
+            // Display Max distance
+            Text Quest = GameObject.Find("Question").GetComponent<Text>();
+            Quest.text = "Max weight: " + GameManager.wcspp_instances[currInstance].maxweight;
+
+            // Display current distance
+            DistanceText = GameObject.Find("DistanceText").GetComponent<Text>();
+
+            // Display current weight
+            WeightText = GameObject.Find("WeightText").GetComponent<Text>();
+
+            // Display reset button
+            Reset = GameObject.Find("Reset").GetComponent<Button>();
+            Reset.onClick.AddListener(ResetClicked);
+
+            // Coordinate of the cities
+            cox = GameManager.wcspp_instances[currInstance].coordinatesx;
+            coy = GameManager.wcspp_instances[currInstance].coordinatesy;
+            unitycoord = BoardFunctions.CoordinateConvertor(cox, coy);
+
+            cities = GameManager.wcspp_instances[currInstance].cities;
+            distances = GameManager.wcspp_instances[currInstance].distancematrix;
+            weights = GameManager.wcspp_instances[currInstance].weightmatrix;
+
+            TSPItemPrefab = (GameObject)Resources.Load("TSPItem");
+            LineItemPrefab = (GameObject)Resources.Load("LineButton");
+
+            // Number of objects
+            int objectCount = coy.Length;
+
+            // Store objects in a list
+            Items = new Item[objectCount];
+            for (int i = 0; i < objectCount; i++)
+            {
+                Item ItemToLocate = GenerateItem(i, unitycoord[i]);
+                Items[i] = ItemToLocate;
+                for (int j = 0; j < GameManager.wcspp_instances[currInstance].ncities; j++)
+                {
+                    Debug.Log(i + " ,j=" + j);
+                    DrawSlimLine(i, j);
+
+                }
+            }
         }
         else if (GameManager.problemName == 'm'.ToString())
         {
@@ -226,10 +274,13 @@ public class BoardManager : MonoBehaviour {
 	public int DistanceTravelled()
 	{
 		int[] individualdistances = new int[previouscities.Count()];
-		if (previouscities.Count() < 2) {
-		} else {
+		if (previouscities.Count() <= 1)
+        {
+		}
+        else
+        {
 			for (int i = 0; i < (previouscities.Count ()-1); i++) {
-				individualdistances [i] = distances [previouscities[i], previouscities[i+1]];
+				individualdistances [i] = distances[previouscities[i], previouscities[i+1]];
 			}
 		}
 
@@ -237,12 +288,36 @@ public class BoardManager : MonoBehaviour {
 		distanceTravelledValue = distancetravelled;
 		return distancetravelled;
 	}
-		
-	void SetDistanceText ()
+
+    public int Weight()
+    {
+        int[] individualweights = new int[previouscities.Count()];
+        if (previouscities.Count() <= 1)
+        {
+        }
+        else
+        {
+            for (int i = 0; i < (previouscities.Count() - 1); i++)
+            {
+                individualweights[i] = weights[previouscities[i], previouscities[i + 1]];
+            }
+        }
+
+        int totalweight = individualweights.Sum();
+        weightValue = totalweight;
+        return weightValue;
+    }
+    void SetDistanceText ()
 	{
 		int distanceT = DistanceTravelled();
 		DistanceText.text = "Distance so far: " + distanceT.ToString () + "km";
-	}
+        if (GameManager.problemName == 'w'.ToString())
+        {
+            int weightT = Weight();
+            WeightText.text = "Weight so far: " + weightT.ToString() + "kg";
+        }
+
+    }
 		
 	//determining whether the city is the first one to have been clicked in that instance i.e. where is the starting point
 	bool CityFirst(int citiesvisited)
@@ -261,7 +336,7 @@ public class BoardManager : MonoBehaviour {
 	{
 		int cityofdestination = ItemToLocate.CityNumber;
 		int cityofdeparture = previouscities[previouscities.Count()-1];
-
+        
 		Vector2 coordestination = unitycoord [cityofdestination];
 		Vector2 coordeparture = unitycoord [cityofdeparture];
 
@@ -273,14 +348,38 @@ public class BoardManager : MonoBehaviour {
 
 		canvas=GameObject.Find("Canvas");
 		instance.transform.SetParent (canvas.GetComponent<Transform> (),false);
-
-		lines[citiesvisited] = instance;
+        //instance.GetComponent<Material>().color = Color.blue;
+        lines[citiesvisited] = instance;
 		newLine[citiesvisited] = lines[citiesvisited].GetComponent<LineRenderer> ();
 		newLine[citiesvisited].SetPositions(coordinates);
 	}
 
-	// If double click on the previous city then change the destination city back to vacant, and delete the connecting line between the two cities
-	void EraseLine(Item ItemToLocate)
+    void DrawSlimLine(int cityofdestination, int cityofdeparture)
+    {
+        Debug.Log(cityofdestination + "from " + cityofdeparture);
+        Vector2 coordestination = unitycoord[cityofdestination];
+        Vector2 coordeparture = unitycoord[cityofdeparture];
+
+        Vector3[] coordinates = new Vector3[2];
+        coordinates[0] = coordestination;
+        coordinates[1] = coordeparture;
+
+        GameObject instance = Instantiate(LineItemPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
+        canvas = GameObject.Find("Canvas");
+        instance.transform.SetParent(canvas.GetComponent<Transform>(), false);
+        instance.GetComponent<LineRenderer>().startWidth = 0.01f;
+        instance.GetComponent<LineRenderer>().endWidth = 0.01f;
+        //instance.GetComponent<Material>().color = Color.white;
+        instance.GetComponent<LineRenderer>().SetColors(Color.white, Color.white);
+        instance.GetComponent<LineRenderer>().SetPosition(0, Vector3.zero);
+        instance.GetComponent<LineRenderer>().SetPosition(1, Vector3.up);
+        Material whiteDiffuseMat = new Material(Shader.Find("Unlit/Texture"));
+        instance.GetComponent<LineRenderer>().material = whiteDiffuseMat;
+        instance.GetComponent<LineRenderer>().SetPositions(coordinates);
+    }
+
+    // If double click on the previous city then change the destination city back to vacant, and delete the connecting line between the two cities
+    void EraseLine(Item ItemToLocate)
 	{
 		if (previouscities.Count == 1) {
 			ItemToLocate.gameItem.GetComponent<Light> ().enabled = false;
