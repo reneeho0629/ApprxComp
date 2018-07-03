@@ -77,40 +77,61 @@ public class BoardManager : MonoBehaviour {
 	// 3. The instance prefab is uploaded
 	void SetInstance()
 	{
-		int randInstance = GameManager.tspRandomization[GameManager.TotalTrial-1];
+        //TSP instance
+        if (GameManager.problemName == 't'.ToString())
+        {
+            Debug.Log("Setting up TSP Instance: Block "+ (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial "+ GameManager.trial+"/" + GameManager.numberOfTrials+" , Total Trial "+ GameManager.TotalTrial);
+            int randInstance = GameManager.tspRandomization[GameManager.TotalTrial - 1];
 
-		//Display Max distance
-		Text Quest = GameObject.Find("Question").GetComponent<Text>();
-		Quest.text = "Max: " + GameManager.game_instances[randInstance].maxdistance + "km";
-        DistanceText = GameObject.Find ("DistanceText").GetComponent<Text>();
-		Reset = GameObject.Find("Reset").GetComponent<Button>();
-		Reset.onClick.AddListener(ResetClicked);
+            //Display Max distance
+            Text Quest = GameObject.Find("Question").GetComponent<Text>();
+            Quest.text = "Max: " + GameManager.game_instances[randInstance].maxdistance + "km";
 
-		cox = GameManager.game_instances [randInstance].coordinatesx;
-		coy = GameManager.game_instances [randInstance].coordinatesy;
-		unitycoord = BoardFunctions.CoordinateConvertor(cox,coy);
+            // Display current distance
+            DistanceText = GameObject.Find("DistanceText").GetComponent<Text>();
 
-		cities = GameManager.game_instances [randInstance].cities;
-		distances = GameManager.game_instances [randInstance].distancematrix;
+            // Display reset button
+            Reset = GameObject.Find("Reset").GetComponent<Button>();
+            Reset.onClick.AddListener(ResetClicked);
 
-		TSPItemPrefab = (GameObject)Resources.Load ("TSPItem");
-		LineItemPrefab = (GameObject)Resources.Load ("LineButton");
+            // Coordinate of the cities
+            cox = GameManager.game_instances[randInstance].coordinatesx;
+            coy = GameManager.game_instances[randInstance].coordinatesy;
+            unitycoord = BoardFunctions.CoordinateConvertor(cox, coy);
 
-		int objectCount =coy.Length;
-		Items = new Item[objectCount];
-		for(int i=0; i < objectCount;i=i+1)
-		{
-			//int objectPositioned = 0;
-			Item ItemToLocate = GenerateItem (i, unitycoord[i]);//66: Change to different Layer?
-			Items[i] = ItemToLocate;
-		}
-	}
+            cities = GameManager.game_instances[randInstance].cities;
+            distances = GameManager.game_instances[randInstance].distancematrix;
+
+
+            TSPItemPrefab = (GameObject)Resources.Load("TSPItem");
+            LineItemPrefab = (GameObject)Resources.Load("LineButton");
+
+            // Number of objects
+            int objectCount = coy.Length;
+
+            // Store objects in a list
+            Items = new Item[objectCount];
+            for (int i = 0; i < objectCount; i++)
+            {
+                Item ItemToLocate = GenerateItem(i, unitycoord[i]);
+                Items[i] = ItemToLocate;
+            }
+        }
+		else if (GameManager.problemName == 'w'.ToString())
+        {
+            Debug.Log("Setting up WCSPP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
+        }
+        else if (GameManager.problemName == 'm'.ToString())
+        {
+            Debug.Log("Setting up MVC Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
+        }
+    }
 
 
 	// Instantiates an Item and places it on the position from the input
-	Item GenerateItem(int ItemNumber ,Vector2 randomPosition)
+	Item GenerateItem(int ItemNumber, Vector2 itemPosition)
 	{
-		GameObject instance = Instantiate (TSPItemPrefab, randomPosition, Quaternion.identity) as GameObject;
+		GameObject instance = Instantiate (TSPItemPrefab, itemPosition, Quaternion.identity) as GameObject;
 
 		canvas=GameObject.Find("Canvas");
 		instance.transform.SetParent (canvas.GetComponent<Transform> (),false);
@@ -119,10 +140,10 @@ public class BoardManager : MonoBehaviour {
 		ItemInstance.gameItem = instance;
 		ItemInstance.CityButton = ItemInstance.gameItem.GetComponent<Button> ();
 		ItemInstance.CityNumber = cities[ItemNumber];
-		ItemInstance.center = randomPosition;
+		ItemInstance.center = itemPosition;
 
 		//Setting the position in a separate line is importatant in order to set it according to global coordinates.
-		BoardFunctions.PlaceItem (ItemInstance,randomPosition);
+		BoardFunctions.PlaceItem (ItemInstance, itemPosition);
 
 		return(ItemInstance);
 	}

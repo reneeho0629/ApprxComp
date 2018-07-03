@@ -60,9 +60,9 @@ public class GameManager : MonoBehaviour
     public static float timeQuestion;
 
 	// Total number of trials in each block
-	private static int numberOfTrials;
+	public static int numberOfTrials;
     // Total number of blocks
-    private static int numberOfBlocks;
+    public static int numberOfBlocks;
 
     // Skip button in case user do not want a break
     public static Button skipButton;
@@ -110,7 +110,7 @@ public class GameManager : MonoBehaviour
 
 
 	// Use this for initialization
-	void Awake () 
+	void Start () 
 	{
 		//Makes the GameManager a Singleton
 		if (gameManager == null) {
@@ -120,7 +120,7 @@ public class GameManager : MonoBehaviour
 		}
 
 		DontDestroyOnLoad (gameObject);
-
+        //Debug.Log("running Start");
 		//Initializes the game
 		boardScript = gameManager.GetComponent<BoardManager> ();
 		InitGame();
@@ -184,13 +184,27 @@ public class GameManager : MonoBehaviour
         {
             trial = 0;
             TotalTrial = 0;
+            block = 0;
             showTimer = true;
-            //tiempo = timeRest3;
+
             totalTime = tiempo = timeRest3;
 
+            currentProblem++;
+            problemName = problemOrder[currentProblem - 1];
+
             Text Quest = GameObject.Find("ProblemName").GetComponent<Text>();
-            Debug.Log(problemName);
-            Quest.text = "Time 4 the nxt problem: " + problemName;
+            if (problemName == 't'.ToString())
+            {
+                Quest.text = "In the next phase: TSP";
+            } 
+            else if (problemName == 'w'.ToString())
+            {
+                Quest.text = "In the next phase: WCSPP";
+            }
+            else if (problemName == 'm'.ToString())
+            {
+                Quest.text = "In the next phase: MVC";
+            }
 
             skipButton = GameObject.Find("Skip").GetComponent<Button>();
             skipButton.onClick.AddListener(SkipClicked);
@@ -202,8 +216,8 @@ public class GameManager : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
-		if (escena != "SetUp") 
-		{
+		if ((escena != "SetUp") && (escena != "end"))
+        {
 			StartTimer ();
 			GameFunctions.PauseManager ();
 		}
@@ -253,25 +267,26 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < problemOrder.Count; i++)
         {
             problemOrder[i] = problemOrder[i].Replace("\'", "");
-            if (problemOrder[i] != 't'.ToString())
-            {
-                //Debug.Log(problemOrder[i]);
-            }
         }
+
+        numberOfProblems = problemOrder.Count;
     }
 
     // Takes care of changing the Scene to the next one (Except for when in the setup scene)
     public static void ChangeToNextScene(List <Vector3> itemClicks, int skipped)
 	{
         BoardManager.keysON = false;
-        Debug.Log(escena);
-		if (escena == "SetUp") {
+        //Debug.Log(escena);
+		if (escena == "SetUp")
+        {
 			InputOutputManager.LoadGame ();
-            Debug.Log("Current Problem: " + currentProblem + "problemName: " + problemOrder[currentProblem]);
+            //Debug.Log("SetUp - Current Problem: " + currentProblem + " problemName: " + problemOrder[currentProblem]);
             problemName = problemOrder[currentProblem];
             SceneManager.LoadScene ("InterProblemRest");
 
-        } else if (escena == "Trial") {
+        }
+        else if (escena == "Trial")
+        {
 			Distancetravelled = BoardManager.distanceTravelledValue;
 
 			if (skipped == 1) {
@@ -287,19 +302,19 @@ public class GameManager : MonoBehaviour
 
             InputOutputManager.SaveClicks(itemClicks);
             SceneManager.LoadScene("InterTrialRest");
-        } else if (escena == "InterTrialRest") {
-			ChangeToNextTrial ();
-		} else if (escena == "InterBlockRest") {
-            if (block == numberOfBlocks)
-            {
-                SceneManager.LoadScene("InterProblemRest");
-            }
+        }
+        else if (escena == "InterTrialRest")
+        {
+            ChangeToNextTrial ();
+		}
+        else if (escena == "InterBlockRest")
+        {
 			SceneManager.LoadScene ("Trial");
 		}
         else if (escena == "InterProblemRest")
         {
-            Debug.Log("Current Problem: "+ currentProblem+"problemName: "+ problemOrder[currentProblem]);
-            problemName = problemOrder[currentProblem];
+            Debug.Log("InterProblem - Current Problem: "+ currentProblem+" problemName: "+ problemOrder[currentProblem-1]);
+           
             ChangeToNextTrial();
         }
     }
@@ -312,14 +327,13 @@ public class GameManager : MonoBehaviour
         {
             SceneManager.LoadScene("Trial");
         }
-        else if (block < numberOfBlocks)
+        else if (block < numberOfBlocks - 1)
         {
             SceneManager.LoadScene("InterBlockRest");
         }
-        else if (currentProblem < numberOfProblems)
+        else if ((block == numberOfBlocks - 1) && currentProblem < numberOfProblems)
         {
-            currentProblem++;
-            SceneManager.LoadScene("Trial");
+            SceneManager.LoadScene("InterProblemRest");
         }
         else
         {
@@ -364,6 +378,7 @@ public class GameManager : MonoBehaviour
         //When the time runs out:
         if (tiempo < 0)
 		{
+            //Debug.Log("time ran out");
 			ChangeToNextScene(BoardManager.itemClicks,0);
 		}
 	}
