@@ -15,9 +15,11 @@ public class BoardManager : MonoBehaviour {
 
 	// Prefab of the Item interface configuration
 	public static GameObject TSPItemPrefab;
+    public static GameObject StartCityPrefab;
+    public static GameObject EndCityPrefab;
 
-	// Prefab of the Item interface configuration
-	public static GameObject LineItemPrefab;
+    // Prefab of the Item interface configuration
+    public static GameObject LineItemPrefab;
 
 	// Current counters
 	public Text DistanceText;
@@ -150,6 +152,8 @@ public class BoardManager : MonoBehaviour {
             weights = GameManager.wcspp_instances[currInstance].weightmatrix;
 
             TSPItemPrefab = (GameObject)Resources.Load("TSPItem");
+            StartCityPrefab = (GameObject)Resources.Load("StartCityItem");
+            EndCityPrefab = (GameObject)Resources.Load("EndCityItem");
             LineItemPrefab = (GameObject)Resources.Load("LineButton");
 
             // Number of objects
@@ -163,7 +167,7 @@ public class BoardManager : MonoBehaviour {
                 Items[i] = ItemToLocate;
                 for (int j = 0; j < GameManager.wcspp_instances[currInstance].ncities; j++)
                 {
-                    Debug.Log(i + " ,j=" + j);
+                    //Debug.Log(i + " ,j=" + j);
                     DrawSlimLine(i, j);
 
                 }
@@ -179,9 +183,17 @@ public class BoardManager : MonoBehaviour {
 	// Instantiates an Item and places it on the position from the input
 	Item GenerateItem(int ItemNumber, Vector2 itemPosition)
 	{
-		GameObject instance = Instantiate (TSPItemPrefab, itemPosition, Quaternion.identity) as GameObject;
-
-		canvas=GameObject.Find("Canvas");
+        GameObject instance = Instantiate(TSPItemPrefab, itemPosition, Quaternion.identity) as GameObject;
+        if (GameManager.problemName == 'w'.ToString() && ItemNumber == GameManager.wcspp_instances[GameManager.wcsppRandomization[GameManager.TotalTrial - 1]].startcity)
+        {
+            instance = Instantiate(StartCityPrefab, itemPosition, Quaternion.identity) as GameObject;
+        }
+        else if (GameManager.problemName == 'w'.ToString() && ItemNumber == GameManager.wcspp_instances[GameManager.wcsppRandomization[GameManager.TotalTrial - 1]].endcity)
+        {
+            instance = Instantiate(EndCityPrefab, itemPosition, Quaternion.identity) as GameObject;
+        }
+		
+        canvas =GameObject.Find("Canvas");
 		instance.transform.SetParent (canvas.GetComponent<Transform> (),false);
 
 		Item ItemInstance;
@@ -356,7 +368,7 @@ public class BoardManager : MonoBehaviour {
 
     void DrawSlimLine(int cityofdestination, int cityofdeparture)
     {
-        Debug.Log(cityofdestination + "from " + cityofdeparture);
+        //Debug.Log(cityofdestination + "from " + cityofdeparture);
         Vector2 coordestination = unitycoord[cityofdestination];
         Vector2 coordeparture = unitycoord[cityofdeparture];
 
@@ -370,11 +382,9 @@ public class BoardManager : MonoBehaviour {
         instance.GetComponent<LineRenderer>().startWidth = 0.01f;
         instance.GetComponent<LineRenderer>().endWidth = 0.01f;
         //instance.GetComponent<Material>().color = Color.white;
-        instance.GetComponent<LineRenderer>().SetColors(Color.white, Color.white);
-        instance.GetComponent<LineRenderer>().SetPosition(0, Vector3.zero);
-        instance.GetComponent<LineRenderer>().SetPosition(1, Vector3.up);
-        Material whiteDiffuseMat = new Material(Shader.Find("Unlit/Texture"));
-        instance.GetComponent<LineRenderer>().material = whiteDiffuseMat;
+        //instance.GetComponent<LineRenderer>().SetColors(Color.white, Color.white);
+        //Material whiteDiffuseMat = new Material(Shader.Find("Unlit/Texture"));
+        //instance.GetComponent<LineRenderer>().material = whiteDiffuseMat;
         instance.GetComponent<LineRenderer>().SetPositions(coordinates);
     }
 

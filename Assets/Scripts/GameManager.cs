@@ -4,7 +4,7 @@
  * Input files are stored in ./StreamingAssets/Input
  * User responses and other data are stored in ./StreamingAssets/Output
  * 
- * Run program in 1024 x 768 after build
+ * Run program in 1680x1050 (or higher) after build
  * 
  * Based on Knapsack and TSP code written by Pablo Franco and Karlo Doroc
  * Modified by Anthony Hsu for his Finance Honours research project 2018.
@@ -126,6 +126,9 @@ public class GameManager : MonoBehaviour
         public int ncities;
         public int maxweight;
 
+        public int startcity;
+        public int endcity;
+
         public string id;
         public string type;
         public string param;
@@ -173,7 +176,8 @@ public class GameManager : MonoBehaviour
         // If it's the first scene, upload parameters and instances (this happens only once), move incrememntally through >blocks< 1 at a time
         if (escena == "SetUp") 
 		{
-			block++;
+            showTimer = false;
+            block++;
 			GameFunctions.SetupInitialScreen ();
 		} 
 		else if (escena == "Trial") 
@@ -231,8 +235,12 @@ public class GameManager : MonoBehaviour
             skipButton = GameObject.Find("Skip").GetComponent<Button>();
             skipButton.onClick.AddListener(SkipClicked);
         }
+        else if (escena == "end")
+        {
+            showTimer = false;
+        }
 
-	}
+    }
 
 
 	// Update is called once per frame

@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class BoardFunctions : MonoBehaviour {
     // Resoultion width and Height
     // CAUTION! Modifying this does not modify the Screen resolution. This is related to the unit grid on Unity.
+    // CAUTION x2! Listen to the above warning. It's really not a good idea to mess with the following parameters. Just leave them as is.
     public static int resolutionWidth = 1024 - 110;
     public static int resolutionHeight = 768 - 130;
 
@@ -30,17 +31,13 @@ public class BoardFunctions : MonoBehaviour {
 		//Setting the position in a separate line is importatant in order to set it according to global coordinates.
 		ItemToLocate.gameItem.transform.position = position;
 		ItemToLocate.CityButton.onClick.AddListener(delegate{GameManager.gameManager.boardScript.ClickOnItem(ItemToLocate);});
-	}	
+	}
 
 	// Updates the timer rectangle size accoriding to the remaining time.
 	public static void UpdateTimer()
 	{
-		if (GameManager.escena != "SetUp" || GameManager.escena == "InterTrialRest" || GameManager.escena == "End") 
-		{
-			Image timer = GameObject.Find ("Timer").GetComponent<Image> ();
-			timer.fillAmount = GameManager.tiempo / GameManager.totalTime;
-		}
-
+		Image timer = GameObject.Find ("Timer").GetComponent<Image> ();
+		timer.fillAmount = GameManager.tiempo / GameManager.totalTime;
 	}
     
 	public static void HighlightButton(GameObject button)

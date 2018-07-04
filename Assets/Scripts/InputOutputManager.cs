@@ -195,6 +195,8 @@ public class InputOutputManager : MonoBehaviour {
             string weightvectorS;
             string ncitiesS;
             string maxweightS;
+            string startcityS;
+            string endcityS;
 
             //grab all of those parameters as strings
             dict.TryGetValue("cities", out citiesS);
@@ -203,6 +205,9 @@ public class InputOutputManager : MonoBehaviour {
             dict.TryGetValue("distancevector", out distancevectorS);
             dict.TryGetValue("weightvector", out weightvectorS);
             dict.TryGetValue("ncities", out ncitiesS);
+            dict.TryGetValue("maxweight", out maxweightS);
+            dict.TryGetValue("startcity", out startcityS);
+            dict.TryGetValue("endcity", out endcityS);
             dict.TryGetValue("maxweight", out maxweightS);
 
             //convert (most of them) to integers, with variables and literals being arrays and the others single literals
@@ -218,6 +223,9 @@ public class InputOutputManager : MonoBehaviour {
 
             wcspp_instances[k - 1].ncities = int.Parse(ncitiesS);
             wcspp_instances[k - 1].maxweight = int.Parse(maxweightS);
+
+            wcspp_instances[k - 1].startcity = int.Parse(startcityS);
+            wcspp_instances[k - 1].endcity = int.Parse(endcityS);
 
             dict.TryGetValue("MZN", out wcspp_instances[k - 1].id);
             dict.TryGetValue("param", out wcspp_instances[k - 1].param);
