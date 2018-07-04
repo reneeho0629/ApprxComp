@@ -246,17 +246,23 @@ public class BoardManager : MonoBehaviour {
 	//connecting line between the city of departure and the destination
 	public void ClickOnItem(Item ItemToLocate)
 	{
-		if (!previouscities.Contains (ItemToLocate.CityNumber) || (previouscities.Count () == cities.Length && previouscities.First () == ItemToLocate.CityNumber)) {
-			if (CityFirst (previouscities.Count ())) {
+		if (!previouscities.Contains (ItemToLocate.CityNumber) || (previouscities.Count () == cities.Length && previouscities.First () == ItemToLocate.CityNumber))
+        {
+			if (CityFirst (previouscities.Count ()))
+            {
 				LightFirstCity (ItemToLocate);
-			} else {
+			}
+            else
+            {
 				DrawLine (ItemToLocate);
 			}
-			AddCity (ItemToLocate);
+			AddCity(ItemToLocate);
 			itemClicks.Add (new Vector3 (ItemToLocate.CityNumber, GameManager.timeQuestion - GameManager.tiempo,1));
 			SetDistanceText ();
-		} else if (previouscities.Last () == ItemToLocate.CityNumber) {
-			EraseLine (ItemToLocate);
+		}
+        else if (previouscities.Last () == ItemToLocate.CityNumber)
+        {
+			EraseLine(ItemToLocate);
 			itemClicks.Add (new Vector3 (ItemToLocate.CityNumber, GameManager.timeQuestion - GameManager.tiempo,0));
 		}
 	}
@@ -341,7 +347,7 @@ public class BoardManager : MonoBehaviour {
 	private void LightFirstCity(Item ItemToLocate)
 	{
 		Light myLight = ItemToLocate.gameItem.GetComponent<Light> ();
-		myLight.enabled = !myLight.enabled;
+		myLight.enabled = true;
 	}
 		
 	void DrawLine(Item ItemToLocate) 
@@ -360,6 +366,7 @@ public class BoardManager : MonoBehaviour {
 
 		canvas=GameObject.Find("Canvas");
 		instance.transform.SetParent (canvas.GetComponent<Transform> (),false);
+        instance.GetComponent<LineRenderer>().sortingOrder = 1;
         //instance.GetComponent<Material>().color = Color.blue;
         lines[citiesvisited] = instance;
 		newLine[citiesvisited] = lines[citiesvisited].GetComponent<LineRenderer> ();
@@ -381,10 +388,8 @@ public class BoardManager : MonoBehaviour {
         instance.transform.SetParent(canvas.GetComponent<Transform>(), false);
         instance.GetComponent<LineRenderer>().startWidth = 0.01f;
         instance.GetComponent<LineRenderer>().endWidth = 0.01f;
-        //instance.GetComponent<Material>().color = Color.white;
-        //instance.GetComponent<LineRenderer>().SetColors(Color.white, Color.white);
-        //Material whiteDiffuseMat = new Material(Shader.Find("Unlit/Texture"));
-        //instance.GetComponent<LineRenderer>().material = whiteDiffuseMat;
+        instance.GetComponent<LineRenderer>().material.color = Color.white;
+        instance.GetComponent<LineRenderer>().sortingOrder = 0;
         instance.GetComponent<LineRenderer>().SetPositions(coordinates);
     }
 
@@ -403,9 +408,11 @@ public class BoardManager : MonoBehaviour {
 
     // Turn off the light for the first city
 	private void Lightoff(){
-		foreach(Item Item1 in Items){
-			if (Item1.CityNumber == previouscities[0]){
-				Light myLight = Item1.gameItem.GetComponent<Light> ();
+		foreach(Item Item in Items){
+			if (Item.CityNumber == previouscities[0] && GameManager.problemName != 'w'.ToString())
+            {
+				Light myLight = 
+                    Item.gameItem.GetComponent<Light> ();
 				myLight.enabled = false;
 			}
 		}

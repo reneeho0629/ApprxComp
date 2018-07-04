@@ -310,7 +310,6 @@ public class GameManager : MonoBehaviour
 		if (escena == "SetUp")
         {
 			InputOutputManager.LoadGame ();
-            //Debug.Log("SetUp - Current Problem: " + currentProblem + " problemName: " + problemOrder[currentProblem]);
             problemName = problemOrder[currentProblem];
             SceneManager.LoadScene ("InterProblemRest");
 
@@ -342,9 +341,7 @@ public class GameManager : MonoBehaviour
 			SceneManager.LoadScene ("Trial");
 		}
         else if (escena == "InterProblemRest")
-        {
-            Debug.Log("InterProblem - Current Problem: "+ currentProblem+" problemName: "+ problemOrder[currentProblem-1]);
-           
+        {           
             ChangeToNextTrial();
         }
     }
