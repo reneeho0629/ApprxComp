@@ -183,10 +183,12 @@ public class BoardManager : MonoBehaviour
         {
             Item ItemToLocate = GenerateItem(i, unitycoord[i]);
             Items[i] = ItemToLocate;
-            for (int j = 0; j < GameManager.wcspp_instances[currInstance].ncities; j++)
+            for (int j = 0; j < objectCount; j++)
             {
-                DrawSlimLine(i, j);
-
+                if (distances[i, j] != 0)
+                {
+                    DrawSlimLine(i, j);
+                }
             }
         }
     }
@@ -486,7 +488,7 @@ public class BoardManager : MonoBehaviour
         newLine[citiesvisited].SetPositions(coordinates);
     }
 
-    void DrawSlimLine(int cityofdestination, int cityofdeparture)
+    void DrawSlimLine(int cityofdeparture, int cityofdestination)
     {
         Vector2 coordestination = unitycoord[cityofdestination];
         Vector2 coordeparture = unitycoord[cityofdeparture];
