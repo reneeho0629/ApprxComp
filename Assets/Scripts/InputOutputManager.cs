@@ -4,78 +4,83 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
 using System.IO;
-using System.Linq; 
+using System.Linq;
 using Random = UnityEngine.Random;
 //using UnityEditor;
 
-public class InputOutputManager : MonoBehaviour {
+public class InputOutputManager : MonoBehaviour
+{
 
-	// Setting up the variable participantID
-	public static string participantID = "Empty";
+    // Setting up the variable participantID
+    public static string participantID;
 
-	// This is the randomisation number (#_param2.txt that is to be used for oder of instances for this participant)
-	public static string randomisationID = "Empty";
+    // This is the randomisation number (#_param2.txt that is to be used for oder of instances for this participant)
+    public static string randomisationID;
 
     // Current time, used in output file names
-	public static string dateID = @System.DateTime.Now.ToString("dd MMMM, yyyy, HH-mm");
+    public static string dateID = @System.DateTime.Now.ToString("dd MMMM, yyyy, HH-mm");
 
-	// Starting string of the output file names
-	private static string identifierName;
+    // Starting string of the output file names
+    private static string TSPidentifier;
+    private static string WCSPPidentifier;
+    private static string Midentifier;
 
-	// Input and Outout Folders with respect to the Application.dataPath;
-	private static string inputFolder = "/StreamingAssets/Input/";
-	private static string inputFolderInstances = "/StreamingAssets/Input/Instances/";
-	private static string outputFolder = "/StreamingAssets/Output/";
+    // Input and Outout Folders with respect to the Application.dataPath;
+    private static string inputFolder = "/StreamingAssets/Input/";
+    private static string inputFolderInstances = "/StreamingAssets/Input/Instances/";
+    private static string outputFolder = "/StreamingAssets/Output/";
 
-	// Complete folder path of the inputs and ouputs
-	private static string folderPathLoad;
-	private static string folderPathLoadInstances;
-	private static string folderPathSave;
+    // Complete folder path of the inputs and ouputs
+    private static string folderPathLoad;
+    private static string folderPathLoadInstances;
+    private static string folderPathSave;
 
-	public static void LoadGame()
+    public static void LoadGame()
     {
-		identifierName = "TSP_" + participantID + "_" + randomisationID + "_" + dateID + "_";
+        TSPidentifier = "TSP_" + participantID + "_" + randomisationID + "_" + dateID + "_";
+        WCSPPidentifier = "WCSPP_" + participantID + "_" + randomisationID + "_" + dateID + "_";
+        Midentifier = "M_" + participantID + "_" + randomisationID + "_" + dateID + "_";
 
-		folderPathLoad = Application.dataPath + inputFolder;
-		folderPathLoadInstances = Application.dataPath + inputFolderInstances;
-		folderPathSave = Application.dataPath + outputFolder;
+        folderPathLoad = Application.dataPath + inputFolder;
+        folderPathLoadInstances = Application.dataPath + inputFolderInstances;
+        folderPathSave = Application.dataPath + outputFolder;
 
-		Dictionary<string, string> dict = LoadParameters ();
-		GameManager.AssignVariables(dict);
+        Dictionary<string, string> dict = LoadParameters();
+        GameManager.AssignVariables(dict);
 
-		GameManager.tsp_instances = LoadTSPInstances (GameManager.numberOfInstances);
+        GameManager.tsp_instances = LoadTSPInstances(GameManager.numberOfInstances);
         GameManager.wcspp_instances = LoadWCSPPInstances(GameManager.numberOfInstances);
-        SaveHeaders ();
-	}
+        SaveHeaders();
+    }
 
     // What does this do??????
-	private static int[,] StringToMatrix(string matrixS)
-	{
-		int[] convertor = Array.ConvertAll (matrixS.Substring (1, matrixS.Length - 2).Split (','), int.Parse);
+    private static int[,] StringToMatrix(string matrixS)
+    {
+        int[] convertor = Array.ConvertAll(matrixS.Substring(1, matrixS.Length - 2).Split(','), int.Parse);
 
-		int vectorheight = Convert.ToInt32(Math.Sqrt (convertor.Length));
-		int[,] arr = new int[vectorheight,vectorheight]; // note the swap
-		int x = 0;
-		int y = 0;
-		for (int i = 0; i < convertor.Length; ++i)
-		{
-			arr[y, x] = convertor[i]; // note the swap
-			x++;
-			if (x == vectorheight)
-			{
-				x = 0;
-				y++;
-			}
-		}
-		return arr;
+        int vectorheight = Convert.ToInt32(Math.Sqrt(convertor.Length));
+        int[,] arr = new int[vectorheight, vectorheight]; // note the swap
+        int x = 0;
+        int y = 0;
+        for (int i = 0; i < convertor.Length; ++i)
+        {
+            arr[y, x] = convertor[i]; // note the swap
+            x++;
+            if (x == vectorheight)
+            {
+                x = 0;
+                y++;
+            }
+        }
+        return arr;
 
-	}
+    }
 
-	// Loads the parameters from the text files: param.txt
-	private static Dictionary<string, string> LoadParameters()
-	{
+    // Loads the parameters from the text files: param.txt
+    private static Dictionary<string, string> LoadParameters()
+    {
         // Store parameters in a dictionary
-		var dict = new Dictionary<string, string>();
+        var dict = new Dictionary<string, string>();
 
         // Reading time_param.txt
         using (StreamReader sr1 = new StreamReader(folderPathLoad + "time_param.txt"))
@@ -89,6 +94,7 @@ public class InputOutputManager : MonoBehaviour {
                 // Add the key-value pair to the dictionary:
                 dict.Add(tmp[0], tmp[1]);
             }
+            sr1.Close();
         }
 
         // Reading param2.txt within the Input folder
@@ -96,7 +102,7 @@ public class InputOutputManager : MonoBehaviour {
         {
             // (This loop reads every line until EOF or the first blank line.)
             string line2;
-            
+
             while (!string.IsNullOrEmpty((line2 = sr2.ReadLine())))
             {
                 // Split each line around ':'
@@ -104,64 +110,48 @@ public class InputOutputManager : MonoBehaviour {
                 // Add the key-value pair to the dictionary:
                 dict.Add(tmp[0], tmp[1]);
             }
+            sr2.Close();
         }
-		return dict;
-	}
+        return dict;
+    }
 
-	// Reads all TSP instances from .txt files.
-	// The instances are stored as tspinstances structs in an array called "tspinstances"
-	private static GameManager.TSPInstance[] LoadTSPInstances(int numberOfInstances)
-	{
-		GameManager.TSPInstance[] tsp_instances= new GameManager.TSPInstance[numberOfInstances];
+    // Reads all TSP instances from .txt files.
+    // The instances are stored as tspinstances structs in an array called "tspinstances"
+    private static GameManager.TSPInstance[] LoadTSPInstances(int numberOfInstances)
+    {
+        GameManager.TSPInstance[] tsp_instances = new GameManager.TSPInstance[numberOfInstances];
 
-		for (int k = 1; k <= numberOfInstances; k++) {
-			// create a dictionary where all the variables and definitions are strings
-			var dict = new Dictionary<string, string> ();
-			// Use streamreader to read the input files if there are lines to read
-			using (StreamReader sr = new StreamReader (folderPathLoadInstances + "t"+ k + ".txt")) {
-				string line;
-				while (!string.IsNullOrEmpty ((line = sr.ReadLine ()))) {
-					string[] tmp = line.Split (new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-					// Add the key-value pair to the dictionary:
-					dict.Add (tmp [0], tmp [1]);//int.Parse(dict[tmp[1]]);
-				}
-			}
+        for (int k = 0; k < numberOfInstances; k++)
+        {
+            // create a dictionary where all the variables and definitions are strings
+            var dict = new Dictionary<string, string>();
+            // Use streamreader to read the input files if there are lines to read
+            using (StreamReader sr = new StreamReader(folderPathLoadInstances + "t" + (k + 1) + ".txt"))
+            {
+                string line;
+                while (!string.IsNullOrEmpty((line = sr.ReadLine())))
+                {
+                    string[] tmp = line.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    // Add the key-value pair to the dictionary:
+                    dict.Add(tmp[0], tmp[1]);
+                }
+                sr.Close();
+            }
 
+            //convert (most of them) to integers, with variables and literals being arrays and the others single literals
+            tsp_instances[k].cities = Array.ConvertAll(dict["cities"].Substring(1, dict["cities"].Length - 2).Split(','), int.Parse);
+            tsp_instances[k].coordinatesx = Array.ConvertAll(dict["coordinatesx"].Substring(1, dict["coordinatesx"].Length - 2).Split(','), float.Parse);
+            tsp_instances[k].coordinatesy = Array.ConvertAll(dict["coordinatesy"].Substring(1, dict["coordinatesy"].Length - 2).Split(','), float.Parse);
 
-			// the following are all recorded as strings (hence the S at the end) 
-			string citiesS;
-			string coordinatesxS;
-			string coordinatesyS;
-			string distancevectorS;
-			string ncitiesS;
-			string maxdistanceS;
+            tsp_instances[k].distancevector = Array.ConvertAll(dict["distancevector"].Substring(1, dict["distancevector"].Length - 2).Split(','), int.Parse);
+            tsp_instances[k].distancematrix = StringToMatrix(dict["distancevector"]);
 
-			//grab all of those parameters as strings
-			dict.TryGetValue ("cities", out citiesS);
-			dict.TryGetValue ("coordinatesx", out coordinatesxS);
-			dict.TryGetValue ("coordinatesy", out coordinatesyS);
-			dict.TryGetValue ("distancevector", out distancevectorS);
-			dict.TryGetValue ("ncities", out ncitiesS);
-			dict.TryGetValue ("maxdistance", out maxdistanceS);
+            tsp_instances[k].ncities = int.Parse(dict["ncities"]);
+            tsp_instances[k].maxdistance = int.Parse(dict["maxdistance"]);
+        }
 
-			//convert (most of them) to integers, with variables and literals being arrays and the others single literals
-			tsp_instances [k-1].cities = Array.ConvertAll (citiesS.Substring (1, citiesS.Length - 2).Split (','), int.Parse);
-			tsp_instances [k-1].coordinatesx = Array.ConvertAll (coordinatesxS.Substring (1, coordinatesxS.Length - 2).Split (','), float.Parse);
-			tsp_instances [k-1].coordinatesy = Array.ConvertAll (coordinatesyS.Substring (1, coordinatesyS.Length - 2).Split (','), float.Parse);
-
-			tsp_instances [k-1].distancevector = Array.ConvertAll (distancevectorS.Substring (1, distancevectorS.Length - 2).Split (','), int.Parse);
-			tsp_instances [k-1].distancematrix = StringToMatrix(distancevectorS);
-
-			tsp_instances [k-1].ncities = int.Parse (ncitiesS);
-			tsp_instances [k-1].maxdistance = int.Parse (maxdistanceS);
-
-			dict.TryGetValue ("MZN", out tsp_instances [k - 1].id);
-			dict.TryGetValue ("param", out tsp_instances [k - 1].param);
-			dict.TryGetValue ("type", out tsp_instances [k - 1].type);
-		}
-
-		return(tsp_instances);
-	}
+        return (tsp_instances);
+    }
 
     // Reads all WCSPP instances from .txt files.
     // The instances are stored as tspinstances structs in an array called "tspinstances"
@@ -169,190 +159,156 @@ public class InputOutputManager : MonoBehaviour {
     {
         GameManager.WCSPPInstance[] wcspp_instances = new GameManager.WCSPPInstance[numberOfInstances];
 
-        //for (int k = 1; k <= numberOfInstances; k++)
-        for (int k = 1; k <= 2; k++)
+        //for (int k = 0; k < numberOfInstances; k++)
+        for (int k = 0; k < 2; k++)
         {
             // create a dictionary where all the variables and definitions are strings
             var dict = new Dictionary<string, string>();
             // Use streamreader to read the input files if there are lines to read
-            using (StreamReader sr = new StreamReader(folderPathLoadInstances + "w" + k + ".txt"))
+            using (StreamReader sr = new StreamReader(folderPathLoadInstances + "w" + (k + 1) + ".txt"))
             {
                 string line;
                 while (!string.IsNullOrEmpty((line = sr.ReadLine())))
                 {
                     string[] tmp = line.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
                     // Add the key-value pair to the dictionary:
-                    dict.Add(tmp[0], tmp[1]);//int.Parse(dict[tmp[1]]);
+                    dict.Add(tmp[0], tmp[1]);
                 }
+                sr.Close();
             }
 
-
-            // the following are all recorded as strings (hence the S at the end) 
-            string citiesS;
-            string coordinatesxS;
-            string coordinatesyS;
-            string distancevectorS;
-            string weightvectorS;
-            string ncitiesS;
-            string maxweightS;
-            string startcityS;
-            string endcityS;
-
-            //grab all of those parameters as strings
-            dict.TryGetValue("cities", out citiesS);
-            dict.TryGetValue("coordinatesx", out coordinatesxS);
-            dict.TryGetValue("coordinatesy", out coordinatesyS);
-            dict.TryGetValue("distancevector", out distancevectorS);
-            dict.TryGetValue("weightvector", out weightvectorS);
-            dict.TryGetValue("ncities", out ncitiesS);
-            dict.TryGetValue("maxweight", out maxweightS);
-            dict.TryGetValue("startcity", out startcityS);
-            dict.TryGetValue("endcity", out endcityS);
-            dict.TryGetValue("maxweight", out maxweightS);
-
             //convert (most of them) to integers, with variables and literals being arrays and the others single literals
-            wcspp_instances[k - 1].cities = Array.ConvertAll(citiesS.Substring(1, citiesS.Length - 2).Split(','), int.Parse);
-            wcspp_instances[k - 1].coordinatesx = Array.ConvertAll(coordinatesxS.Substring(1, coordinatesxS.Length - 2).Split(','), float.Parse);
-            wcspp_instances[k - 1].coordinatesy = Array.ConvertAll(coordinatesyS.Substring(1, coordinatesyS.Length - 2).Split(','), float.Parse);
+            wcspp_instances[k].cities = Array.ConvertAll(dict["cities"].Substring(1, dict["cities"].Length - 2).Split(','), int.Parse);
+            wcspp_instances[k].coordinatesx = Array.ConvertAll(dict["coordinatesx"].Substring(1, dict["coordinatesx"].Length - 2).Split(','), float.Parse);
+            wcspp_instances[k].coordinatesy = Array.ConvertAll(dict["coordinatesy"].Substring(1, dict["coordinatesy"].Length - 2).Split(','), float.Parse);
 
-            wcspp_instances[k - 1].distancevector = Array.ConvertAll(distancevectorS.Substring(1, distancevectorS.Length - 2).Split(','), int.Parse);
-            wcspp_instances[k - 1].distancematrix = StringToMatrix(distancevectorS);
+            wcspp_instances[k].distancevector = Array.ConvertAll(dict["distancevector"].Substring(1, dict["distancevector"].Length - 2).Split(','), int.Parse);
+            wcspp_instances[k].distancematrix = StringToMatrix(dict["distancevector"]);
 
-            wcspp_instances[k - 1].weightvector = Array.ConvertAll(weightvectorS.Substring(1, weightvectorS.Length - 2).Split(','), int.Parse);
-            wcspp_instances[k - 1].weightmatrix = StringToMatrix(weightvectorS);
+            wcspp_instances[k].weightvector = Array.ConvertAll(dict["weightvector"].Substring(1, dict["weightvector"].Length - 2).Split(','), int.Parse);
+            wcspp_instances[k].weightmatrix = StringToMatrix(dict["weightvector"]);
 
-            wcspp_instances[k - 1].ncities = int.Parse(ncitiesS);
-            wcspp_instances[k - 1].maxweight = int.Parse(maxweightS);
-
-            wcspp_instances[k - 1].startcity = int.Parse(startcityS);
-            wcspp_instances[k - 1].endcity = int.Parse(endcityS);
-
-            dict.TryGetValue("MZN", out wcspp_instances[k - 1].id);
-            dict.TryGetValue("param", out wcspp_instances[k - 1].param);
-            dict.TryGetValue("type", out wcspp_instances[k - 1].type);
+            wcspp_instances[k].ncities = int.Parse(dict["ncities"]);
+            wcspp_instances[k].maxweight = int.Parse(dict["maxweight"]);
+            
+            wcspp_instances[k].startcity = int.Parse(dict["startcity"]);
+            wcspp_instances[k].endcity = int.Parse(dict["endcity"]);
         }
 
         return (wcspp_instances);
     }
-    /// <summary>
-    /// Saves the headers for both files (Trial Info and Time Stamps)
-    /// In the trial file it saves:  1. The participant ID. 2. Instance details.
-    /// In the TimeStamp file it saves: 1. The participant ID. 2.The time onset of the stopwatch from which the time stamps are measured. 3. the event types description.
-    /// </summary>
+
+    // Saves the headers for output files
+    // In the trial file it saves:  1. The participant ID. 2. Instance details.
+    // In the TimeStamp file it saves: 1. The participant ID. 2.The time onset of the stopwatch from which the time stamps are measured. 3. the event types description.
     private static void SaveHeaders()
-	{
-		// Trial Info file headers
-		string[] lines = new string[2];
-		lines[0]="PartcipantID:" + participantID;
-		lines [1] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber;error";
-		using (StreamWriter outputFile = new StreamWriter(folderPathSave + identifierName + "TrialInfo.txt",true)) 
-		{
-			foreach (string line in lines)
-				outputFile.WriteLine(line);
-		}
+    {
+        // Trial Info file headers
+        string[] lines = new string[2];
+        lines[0] = "PartcipantID:" + participantID;
+        lines[1] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber;error";
+        using (StreamWriter outputFile = new StreamWriter(folderPathSave + TSPidentifier + "TrialInfo.txt", true))
+        {
+            foreach (string line in lines)
+                outputFile.WriteLine(line);
+            outputFile.Close();
+        }
+
+        // Time Stamps file headers
+        string[] lines1 = new string[3];
+        lines1[0] = "PartcipantID:" + participantID;
+        lines1[1] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
+        lines1[2] = "block;trial;eventType;elapsedTime";
+        using (StreamWriter outputFile = new StreamWriter(folderPathSave + TSPidentifier + "TimeStamps.txt", true))
+        {
+            foreach (string line in lines1)
+                outputFile.WriteLine(line);
+            outputFile.Close();
+        }
+
+        // Headers for Clicks file
+        string[] lines2 = new string[3];
+        lines2[0] = "PartcipantID:" + participantID;
+        lines2[1] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
+        lines2[2] = "block;trial;citynumber(100=Reset);In(1)/Out(0)/Reset(3);time";
+        using (StreamWriter outputFile = new StreamWriter(folderPathSave + TSPidentifier + "Clicks.txt", true))
+        {
+            foreach (string line in lines2)
+                outputFile.WriteLine(line);
+            outputFile.Close();
+        }
+    }
 
 
-		// Time Stamps file headers
-		string[] lines1 = new string[3];
-		lines1[0]="PartcipantID:" + participantID;
-		lines1[1] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
-		lines1[2]="block;trial;eventType;elapsedTime";
-		using (StreamWriter outputFile = new StreamWriter(folderPathSave + identifierName + "TimeStamps.txt",true)) 
-		{
-			foreach (string line in lines1)
-				outputFile.WriteLine(line);
-		}
+    // Saves the data of a trial to a .txt file with the participants ID as filename using StreamWriter.
+    // If the file doesn't exist it creates it. Otherwise it adds on lines to the existing file.
+    public static void Save(string itemsSelected, float timeSpent, string error)
+    {
+        // Get the instance number for this trial (take the block number, subtract 1 because indexing starts at 0. Then multiply it
+        // by numberOfTrials (i.e. 10, 10 per block) and add the trial number of this block. Thus, the 2nd trial of block 2 will be
+        // instance number 12 overall) and add 1 because the instanceRandomization is linked to array numbering in C#, which starts at 0;
+        int instanceNum = GameManager.tspRandomization[GameManager.TotalTrial - 1] + 1;
+        int finaldistance = GameManager.Distancetravelled;
 
-		// Headers for Clicks file
-		string[] lines2 = new string[3];
-		lines2[0]="PartcipantID:" + participantID;
-		lines2[1] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
-		lines2[2]="block;trial;citynumber(100=Reset);In(1)/Out(0)/Reset(3);time"; 
-		using (StreamWriter outputFile = new StreamWriter(folderPathSave + identifierName + "Clicks.txt",true)) {
-			foreach (string line in lines2)
-				outputFile.WriteLine(line);
-		}
-
-	}
+        // what to save and the order in which to do so
+        string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + timeSpent + ";" + itemsSelected + ";" + finaldistance + ";"
+            + instanceNum + ";" + error;
 
 
-	// Saves the data of a trial to a .txt file with the participants ID as filename using StreamWriter.
-	// If the file doesn't exist it creates it. Otherwise it adds on lines to the existing file.
-	// Each line in the File has the following structure: "trial;timeSpent".
-	public static void Save(string itemsSelected, float timeSpent, string error) 
-	{
-		// Get the instance number for this trial (take the block number, subtract 1 because indexing starts at 0. Then multiply it
-		// by numberOfTrials (i.e. 10, 10 per block) and add the trial number of this block. Thus, the 2nd trial of block 2 will be
-		// instance number 12 overall) and add 1 because the instanceRandomization is linked to array numbering in C#, which starts at 0;
-		int instanceNum = GameManager.tspRandomization [GameManager.TotalTrial - 1] + 1;
-		int finaldistance = GameManager.Distancetravelled;
-        
-		// what to save and the order in which to do so
-		string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + timeSpent + ";" + itemsSelected + ";" + finaldistance +";" 
-			+ instanceNum + ";" + error;
+        // where to save
+        string[] lines = { dataTrialText };
+
+        using (StreamWriter outputFile = new StreamWriter(folderPathSave + TSPidentifier + "TrialInfo.txt", true))
+        {
+            foreach (string line in lines)
+                outputFile.WriteLine(line);
+            outputFile.Close();
+        }
+
+        //Options of streamwriter include: Write, WriteLine, WriteAsync, WriteLineAsync
+    }
 
 
-		// where to save
-		string[] lines = {dataTrialText};
-		string folderPathSave = Application.dataPath + outputFolder;
+    /// <summary>
+    /// Saves the time stamp for a particular event type to the "TimeStamps" File
+    /// All these saves take place in the Data folder, where you can create an output folder
+    /// </summary>
+    /// Event type: 1=ItemsNoQuestion;11=ItemsWithQuestion;2=AnswerScreen;21=ParticipantsAnswer;3=InterTrialScreen;4=InterBlockScreen;5=EndScreen
+    public static void SaveTimeStamp(string eventType)
+    {
+        string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + eventType + ";" + GameFunctions.TimeStamp();
 
-		using (StreamWriter outputFile = new StreamWriter(folderPathSave + identifierName +"TrialInfo.txt",true)) 
-		{
-			foreach (string line in lines)
-				outputFile.WriteLine(line);
-		}
+        string[] lines = { dataTrialText };
 
-		//Options of streamwriter include: Write, WriteLine, WriteAsync, WriteLineAsync
-	}
+        using (StreamWriter outputFile = new StreamWriter(folderPathSave + TSPidentifier + "TimeStamps.txt", true))
+        {
+            foreach (string line in lines)
+                outputFile.WriteLine(line);
+            outputFile.Close();
+        }
 
+    }
 
-	/// <summary>
-	/// Saves the time stamp for a particular event type to the "TimeStamps" File
-	/// All these saves take place in the Data folder, where you can create an output folder
-	/// </summary>
-	/// Event type: 1=ItemsNoQuestion;11=ItemsWithQuestion;2=AnswerScreen;21=ParticipantsAnswer;3=InterTrialScreen;4=InterBlockScreen;5=EndScreen
-	public static void SaveTimeStamp(string eventType) 
-	{
-		string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + eventType + ";" + GameFunctions.TimeStamp();
+    // Saves the time stamp of every click made on the items 
+    // block ; trial ; clicklist (i.e. item number ; itemIn? (1: selcting; 0:deselecting) ; time of the click with respect to the begining of the trial)
+    public static void SaveClicks(List<BoardManager.Click> itemClicks)
+    {
+        string folderPathSave = Application.dataPath + outputFolder;
 
-		string[] lines = {dataTrialText};
-		string folderPathSave = Application.dataPath + outputFolder;
+        string[] lines = new string[itemClicks.Count];
+        int i = 0;
+        foreach (BoardManager.Click click in itemClicks)
+        {
+            lines[i] = GameManager.block + ";" + GameManager.trial + ";" + click.CityNumber + ";" + click.State + ";" + click.time;
+            i++;
+        }
 
-		//This location can be used by unity to save a file if u open the game in any platform/computer:      Application.persistentDataPath;
-		using (StreamWriter outputFile = new StreamWriter(folderPathSave + identifierName + "TimeStamps.txt",true)) 
-		{
-			foreach (string line in lines)
-				outputFile.WriteLine(line);
-		}
-
-	}
-		
-	// Saves the time stamp of every click made on the items 
-	// block ; trial ; clicklist (i.e. item number ; itemIn? (1: selcting; 0:deselecting) ; time of the click with respect to the begining of the trial)
-	public static void SaveClicks(List<Vector3> clicksList) {
-		string folderPathSave = Application.dataPath + outputFolder;
-
-		string[] lines = new string[clicksList.Count];
-		int i = 0;
-		foreach (Vector3 clickito in clicksList) {
-			lines[i]= GameManager.block + ";" + GameManager.trial + ";" + clickito.x + ";" + clickito.z + ";" + clickito.y ; 
-			i++;
-		}
-
-		using (StreamWriter outputFile = new StreamWriter(folderPathSave + identifierName + "Clicks.txt",true)) {
-			foreach (string line in lines)
-				outputFile.WriteLine(line);
-		} 
-	}
-
- 
-	// In case of an error: Skip trial and go to next one.
-	// Receives as input a string with the errorDetails which is saved in the output file.
-	public static void ErrorInScene(string errorDetails){
-		Debug.Log (errorDetails);
-		BoardManager.keysON = false;
-		InputOutputManager.Save ("", GameManager.totalTime, errorDetails);
-		GameManager.ChangeToNextTrial ();
-	}
+        using (StreamWriter outputFile = new StreamWriter(folderPathSave + TSPidentifier + "Clicks.txt", true))
+        {
+            foreach (string line in lines)
+                outputFile.WriteLine(line);
+            outputFile.Close();
+        }
+    }
 
 }
