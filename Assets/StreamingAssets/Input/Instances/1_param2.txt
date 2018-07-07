@@ -1,7 +1,6 @@
-problemOrder:['t','w','m']
+problemOrder:[t,w,m]
 numberOfTrials:8
 numberOfBlocks:3
-numberOfInstances:24
 tspRandomization:[15,21,24,18,2,8,11,5,14,20,22,16,1,7,10,4,13,19,23,17,3,9,12,6]
 wcsppRandomization:[1,2,1,1,2,1,1,2,2,1,1,1,2,1,2,2,2,2,2,1,1,1,2,2]
 mRandomization:[15,21,24,18,2,8,11,5,14,20,22,16,1,7,10,4,13,19,23,17,3,9,12,6]

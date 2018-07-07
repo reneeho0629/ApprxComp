@@ -8,15 +8,14 @@ using Random = UnityEngine.Random;
 
 public class GameFunctions : MonoBehaviour
 {
-
-    // Stopwatch to calculate time of events.
-    private static System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
-
     // Time at which the stopwatch started. Time of each event is calculated according to this moment.
     public static string initialTimeStamp;
 
     // The Start button
     public Button startButton;
+
+    // Stopwatch to calculate time of events.
+    private static System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
 
     // Function that displays Participant ID, Randomisation ID, and Start prompts in order
     public static void SetupInitialScreen()
@@ -35,7 +34,7 @@ public class GameFunctions : MonoBehaviour
         se.AddListener((value) => SubmitPID(value, start, rand));
         pID.onEndEdit = se;
 
-        //Randomisation ID Input
+        // Randomisation ID Input
         InputField rID = rand.GetComponent<InputField>();
 
         InputField.SubmitEvent se2 = new InputField.SubmitEvent();
@@ -51,12 +50,12 @@ public class GameFunctions : MonoBehaviour
         pID.SetActive(false);
         pIDT.SetActive(true);
 
-        //Set Participant ID
+        // Set Participant ID
         InputOutputManager.participantID = pIDs;
         Text inputID = pIDT.GetComponent<Text>();
         inputID.text = "Randomisation Number";
 
-        //Activate Randomisation Listener
+        // Activate Randomisation Listener
         rand.SetActive(true);
     }
 
@@ -68,19 +67,18 @@ public class GameFunctions : MonoBehaviour
         rID.SetActive(false);
         rIDT.SetActive(true);
 
-        //Set Participant ID
+        // Set Participant ID
         InputOutputManager.randomisationID = rIDs;
 
-        //Activate Start Button and listener
+        // Activate Start Button and listener
         start.SetActive(true);
 
         BoardManager.keysON = true;
 
         Button startButton = GameObject.Find("Start").GetComponent<Button>();
         startButton.onClick.AddListener(StartClicked);
-
     }
-    
+
     // Starts the stopwatch. Time of each event is calculated according to this moment.
     // Sets "initialTimeStamp" to the time at which the stopwatch started.
     public static void SetTimeStamp()
@@ -93,7 +91,7 @@ public class GameFunctions : MonoBehaviour
     public static string TimeStamp()
     {
         long milliSec = stopWatch.ElapsedMilliseconds;
-        return (milliSec/1000f).ToString();
+        return (milliSec / 1000f).ToString();
     }
 
     // Click Start button and move to next scene

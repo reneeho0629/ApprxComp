@@ -10,20 +10,16 @@
  * Modified by Anthony Hsu for his Finance Honours research project 2018.
  */
 
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System;
-using System.IO;
-using System.Linq;
-using Random = UnityEngine.Random;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-
-    // Game Manager: It is a singleton (i.e. it is always one and the same it is nor destroyed nor duplicated)	
+    // Game Manager: It is a singleton (i.e. it is always one and the same it is nor destroyed nor duplicated)
     public static GameManager gameManager = null;
 
     // The reference to the script managing the board (interface/canvas).
@@ -32,19 +28,25 @@ public class GameManager : MonoBehaviour
     // Variables related to scene name and time
     // Current Scene
     public static string escena;
+
     // Time remaining on this scene
     public static float tiempo;
+
     // Total time for this scene
     public static float totalTime;
+
     // Time spent at the instance
     public static float timeSkip;
 
     // Current trial number in the current block
     public static int trial = 0;
+
     // The current trial number across all blocks
     public static int TotalTrial = 0;
+
     // Current block initialization
     public static int block = 0;
+
     // Current problem initialization
     public static int problem = 0;
 
@@ -61,21 +63,22 @@ public class GameManager : MonoBehaviour
 
     // Total number of trials in each block
     public static int numberOfTrials;
+
     // Total number of blocks
     public static int numberOfBlocks;
 
     // Skip button in case user do not want a break
     public static Button skipButton;
 
-    //Number of instance files to be considered. From i1.txt to i24.txt.
+    // Number of instance files to be considered. From i1.txt to i24.txt.
     public static int numberOfInstances;
 
     // Total number of Problems
     private static int numberOfProblems = 3;
+
     // Current problem number: 0, 1, 2.
     private static int currentProblem = 0;
-    // The order of the Problems to be presented
-    public static List<string> problemOrder;
+
     // Name (a char) of the current problem
     public static string problemName;
 
@@ -84,11 +87,14 @@ public class GameManager : MonoBehaviour
     public static int[] wcsppRandomization;
     public static int[] mRandomization;
 
+    // The order of the Problems to be presented
+    public static List<string> problemOrder;
+
     // distance travelled
     public static int Distancetravelled;
 
     // An array of all the instances, i.e importing everything using the structure below 
-    public static TSPInstance[] tsp_instances;
+    public static TSPInstance[] tspInstances;
 
     // A struct that contains the parameters of each TSP instance
     public struct TSPInstance
@@ -106,7 +112,7 @@ public class GameManager : MonoBehaviour
     }
 
     // An array of all the instances, i.e importing everything using the structure below 
-    public static WCSPPInstance[] wcspp_instances;
+    public static WCSPPInstance[] wcsppInstances;
 
     // A struct that contains the parameters of each WCSPP instance
     public struct WCSPPInstance
@@ -131,7 +137,7 @@ public class GameManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        //Makes the GameManager a Singleton
+        // Makes the GameManager a Singleton
         if (gameManager == null)
         {
             gameManager = this;
@@ -142,8 +148,8 @@ public class GameManager : MonoBehaviour
         }
 
         DontDestroyOnLoad(gameObject);
-        //Debug.Log("running Start");
-        //Initializes the game
+
+        // Initializes the game
         boardScript = gameManager.GetComponent<BoardManager>();
         InitGame();
 
@@ -153,18 +159,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    //Initializes the scene. One scene is setup, other is trial, other is Break....
+    // Initializes the scene. One scene is setup, other is trial, other is Break....
     void InitGame()
     {
-        /*
-		Scene Order: escena
-		0= setup
-		1= trial game
-		2= intertrial rest
-		3= interblock rest
-        4= interproblem rest
-		5= end
-		*/
+        /* Scene Order
+         * 0= setup
+         * 1= trial game
+         * 2= intertrial rest
+         * 3= interblock rest
+         * 4= interproblem rest
+         * 5= end
+         */
+
         // Selects the active scene, and call it "escena" - that's Spanish for "scene".
         Scene scene = SceneManager.GetActiveScene();
         escena = scene.name;
@@ -215,18 +221,18 @@ public class GameManager : MonoBehaviour
             currentProblem++;
             problemName = problemOrder[currentProblem - 1];
 
-            Text Quest = GameObject.Find("ProblemName").GetComponent<Text>();
+            Text quest = GameObject.Find("ProblemName").GetComponent<Text>();
             if (problemName == 't'.ToString())
             {
-                Quest.text = "In the next phase: TSP";
+                quest.text = "In the next phase: TSP";
             }
             else if (problemName == 'w'.ToString())
             {
-                Quest.text = "In the next phase: WCSPP";
+                quest.text = "In the next phase: WCSPP";
             }
             else if (problemName == 'm'.ToString())
             {
-                Quest.text = "In the next phase: MVC";
+                quest.text = "In the next phase: MVC";
             }
 
             skipButton = GameObject.Find("Skip").GetComponent<Button>();
@@ -236,9 +242,7 @@ public class GameManager : MonoBehaviour
         {
             showTimer = false;
         }
-
     }
-
 
     // Update is called once per frame
     void Update()
@@ -252,63 +256,54 @@ public class GameManager : MonoBehaviour
     // Assigns the parameters in the dictionary to variables
     public static void AssignVariables(Dictionary<string, string> dictionary)
     {
-        //Assigns Parameters - these are all going to be imported from input files
+        // Assigns Parameters - these have been imported from input files
         timeRest1 = Convert.ToSingle(dictionary["timeRest1"]);
         timeRest2 = Convert.ToSingle(dictionary["timeRest2"]);
         timeRest3 = Convert.ToSingle(dictionary["timeRest3"]);
-        timeQuestion = Int32.Parse(dictionary["timeQuestion"]);
-        numberOfTrials = Int32.Parse(dictionary["numberOfTrials"]);
-        numberOfBlocks = Int32.Parse(dictionary["numberOfBlocks"]);
+        timeQuestion = int.Parse(dictionary["timeQuestion"]);
+        numberOfTrials = int.Parse(dictionary["numberOfTrials"]);
+        numberOfBlocks = int.Parse(dictionary["numberOfBlocks"]);
         numberOfInstances = numberOfTrials * numberOfBlocks;
 
-        // Getting TSP randomisation parameters. Code is extremely inefficient, future users should try to improve.
-        int[] tspRandomizationNo0 = Array.ConvertAll(dictionary["tspRandomization"].Substring(1, dictionary["tspRandomization"].Length - 2).Split(','), int.Parse);
-        tspRandomization = new int[tspRandomizationNo0.Length];
-
-        for (int i = 0; i < tspRandomizationNo0.Length; i++)
-        {
-            tspRandomization[i] = tspRandomizationNo0[i] - 1;
-        }
+        // Getting TSP randomisation parameters. 
+        tspRandomization = StrToInt(dictionary["tspRandomization"]);
 
         // Getting WCSPP randomisation parameters
-        int[] wcsppRandomizationNo0 = Array.ConvertAll(dictionary["wcsppRandomization"].Substring(1, dictionary["wcsppRandomization"].Length - 2).Split(','), int.Parse);
-        wcsppRandomization = new int[wcsppRandomizationNo0.Length];
-
-        for (int i = 0; i < wcsppRandomizationNo0.Length; i++)
-        {
-            wcsppRandomization[i] = wcsppRandomizationNo0[i] - 1;
-        }
+        wcsppRandomization = StrToInt(dictionary["wcsppRandomization"]);
 
         // Getting m randomisation parameters
-        int[] mRandomizationNo0 = Array.ConvertAll(dictionary["mRandomization"].Substring(1, dictionary["mRandomization"].Length - 2).Split(','), int.Parse);
-        mRandomization = new int[mRandomizationNo0.Length];
+        mRandomization = StrToInt(dictionary["mRandomization"]);
 
-        for (int i = 0; i < mRandomizationNo0.Length; i++)
+        // Getting problem randomisation parameters
+        problemOrder = StrToStr(dictionary["problemOrder"]);
+    }
+
+    public static int[] StrToInt(string valueStr)
+    {
+        int[] targetList = Array.ConvertAll(valueStr.Substring(1, valueStr.Length - 2).Split(','), int.Parse);
+
+        for (int i = 0; i < targetList.Length; i++)
         {
-            mRandomization[i] = mRandomizationNo0[i] - 1;
+            --targetList[i];
         }
 
-        problemOrder = dictionary["problemOrder"].Substring(1, dictionary["problemOrder"].Length - 2).Split(',').ToList();
+        return targetList;
+    }
 
-        for (int i = 0; i < problemOrder.Count; i++)
-        {
-            problemOrder[i] = problemOrder[i].Replace("\'", "");
-        }
-
-        numberOfProblems = problemOrder.Count;
+    public static List<string> StrToStr(string valueStr)
+    {
+        return valueStr.Substring(1, valueStr.Length - 2).Split(',').ToList();
     }
 
     // Takes care of changing the Scene to the next one (Except for when in the setup scene)
     public static void ChangeToNextScene(List<BoardManager.Click> itemClicks, bool skipped)
     {
         BoardManager.keysON = false;
-        //Debug.Log(escena);
         if (escena == "SetUp")
         {
             InputOutputManager.LoadGame();
             problemName = problemOrder[currentProblem];
             SceneManager.LoadScene("InterProblemRest");
-
         }
         else if (escena == "Trial")
         {
@@ -324,7 +319,7 @@ public class GameManager : MonoBehaviour
             }
 
             // Save participant answer
-            InputOutputManager.Save(ExtractItemsSelected(itemClicks), timeSkip, "");
+            InputOutputManager.Save(ExtractItemsSelected(itemClicks), timeSkip, string.Empty);
             InputOutputManager.SaveTimeStamp("ParticipantAnswer");
             InputOutputManager.SaveClicks(itemClicks);
 
@@ -348,7 +343,7 @@ public class GameManager : MonoBehaviour
     // Redirects to the next scene depending if the trials or blocks are over.
     public static void ChangeToNextTrial()
     {
-        //Checks if trials are over
+        // Checks if trials are over
         if (trial < numberOfTrials)
         {
             SceneManager.LoadScene("Trial");
@@ -387,14 +382,17 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        string itemsInS = "";
+        string itemsInS = string.Empty;
         foreach (int i in itemsIn)
         {
             itemsInS = itemsInS + i + ",";
         }
-        if (itemsInS.Length > 0)
-            itemsInS = itemsInS.Remove(itemsInS.Length - 1);
 
+        if (itemsInS.Length > 0)
+        {
+            itemsInS = itemsInS.Remove(itemsInS.Length - 1);
+        }
+        
         return itemsInS;
     }
 
@@ -408,7 +406,7 @@ public class GameManager : MonoBehaviour
             BoardFunctions.UpdateTimer();
         }
 
-        //When the time runs out:
+        // When the time runs out:
         if (tiempo < 0)
         {
             ChangeToNextScene(BoardManager.itemClicks, false);

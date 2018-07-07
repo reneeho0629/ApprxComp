@@ -18,6 +18,7 @@ public class BoardManager : MonoBehaviour
     public static GameObject EndCityPrefab;
     public static GameObject LineItemPrefab;
     public static GameObject TextPrefab;
+    public static GameObject BigTextPrefab;
 
     // Current counters
     public Text DistanceText;
@@ -25,7 +26,7 @@ public class BoardManager : MonoBehaviour
     public static int distanceTravelledValue;
     public static int weightValue;
 
-    //Coordinate vectors for this trial. ONLY INTEGERS allowed.
+    // Coordinate vectors for this trial. ONLY INTEGERS allowed.
     private float[] cox;
     private float[] coy;
     private int[] cities;
@@ -51,13 +52,15 @@ public class BoardManager : MonoBehaviour
         public Button CityButton;
     }
 
-    // The Items for the scene are stored in an array of structs
-    private Item[] Items;
+    public static Color thinLineColor = Color.white;
+
+    // The items for the scene are stored in an array of structs
+    private Item[] items;
 
     // A list to store the unity coordinates of the vertices
     public List<Vector2> unitycoord = new List<Vector2>();
 
-    //  A list to store the previous city numbers
+    // A list to store the previous city numbers
     public List<int> previouscities = new List<int>();
 
     // The list of all the button clicks. Each event contains the following information:
@@ -95,28 +98,29 @@ public class BoardManager : MonoBehaviour
         EndCityPrefab = (GameObject)Resources.Load("EndCityItem");
         LineItemPrefab = (GameObject)Resources.Load("LineItem");
         TextPrefab = (GameObject)Resources.Load("TextItem");
+        BigTextPrefab = (GameObject)Resources.Load("BigTextItem");
 
-        //  TSP instance
         if (GameManager.problemName == 't'.ToString())
         {
+            // TSP instance
             SetTSP();
         }
-        // WCSPP Instance
         else if (GameManager.problemName == 'w'.ToString())
         {
+            // WCSPP Instance
             SetWCSPP();
         }
-        // M Instance
         else if (GameManager.problemName == 'm'.ToString())
         {
+            // M Instance
             SetM();
         }
     }
 
-
     void SetTSP()
     {
         Debug.Log("Setting up TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
+        
         // current instance
         currInstance = GameManager.tspRandomization[GameManager.TotalTrial - 1];
 
@@ -128,61 +132,62 @@ public class BoardManager : MonoBehaviour
         Reset.onClick.AddListener(ResetClicked);
 
         // Coordinate of the cities
-        cox = GameManager.tsp_instances[currInstance].coordinatesx;
-        coy = GameManager.tsp_instances[currInstance].coordinatesy;
+        cox = GameManager.tspInstances[currInstance].coordinatesx;
+        coy = GameManager.tspInstances[currInstance].coordinatesy;
         unitycoord = BoardFunctions.CoordinateConvertor(cox, coy);
 
-        cities = GameManager.tsp_instances[currInstance].cities;
-        distances = GameManager.tsp_instances[currInstance].distancematrix;
+        cities = GameManager.tspInstances[currInstance].cities;
+        distances = GameManager.tspInstances[currInstance].distancematrix;
 
         // Number of objects
         int objectCount = coy.Length;
 
         // Store objects in a list
-        Items = new Item[objectCount];
+        items = new Item[objectCount];
         for (int i = 0; i < objectCount; i++)
         {
-            Item ItemToLocate = GenerateItem(i, unitycoord[i]);
-            Items[i] = ItemToLocate;
+            Item itemToLocate = GenerateItem(i, unitycoord[i]);
+            items[i] = itemToLocate;
         }
     }
+
     void SetWCSPP()
     {
         Debug.Log("Setting up WCSPP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
         currInstance = GameManager.wcsppRandomization[GameManager.TotalTrial - 1];
 
         // Display Max distance
-        Text Quest = GameObject.Find("Question").GetComponent<Text>();
-        Quest.text = "Max weight: " + GameManager.wcspp_instances[currInstance].maxweight + "kg";
+        Text quest = GameObject.Find("Question").GetComponent<Text>();
+        quest.text = "Max weight: " + GameManager.wcsppInstances[currInstance].maxweight + "kg";
 
         // Display current distance
         DistanceText = GameObject.Find("DistanceText").GetComponent<Text>();
+        DistanceText.color = Color.green;
 
         // Display current weight
         WeightText = GameObject.Find("WeightText").GetComponent<Text>();
+        WeightText.color = Color.red;
 
         // Display reset button
         Reset = GameObject.Find("Reset").GetComponent<Button>();
         Reset.onClick.AddListener(ResetClicked);
 
         // Coordinate of the cities
-        cox = GameManager.wcspp_instances[currInstance].coordinatesx;
-        coy = GameManager.wcspp_instances[currInstance].coordinatesy;
+        cox = GameManager.wcsppInstances[currInstance].coordinatesx;
+        coy = GameManager.wcsppInstances[currInstance].coordinatesy;
         unitycoord = BoardFunctions.CoordinateConvertor(cox, coy);
 
-        cities = GameManager.wcspp_instances[currInstance].cities;
-        distances = GameManager.wcspp_instances[currInstance].distancematrix;
-        weights = GameManager.wcspp_instances[currInstance].weightmatrix;
+        cities = GameManager.wcsppInstances[currInstance].cities;
+        distances = GameManager.wcsppInstances[currInstance].distancematrix;
+        weights = GameManager.wcsppInstances[currInstance].weightmatrix;
 
         // Number of objects
         int objectCount = coy.Length;
 
         // Store objects in a list
-        Items = new Item[objectCount];
+        items = new Item[objectCount];
         for (int i = 0; i < objectCount; i++)
         {
-            Item ItemToLocate = GenerateItem(i, unitycoord[i]);
-            Items[i] = ItemToLocate;
             for (int j = 0; j < objectCount; j++)
             {
                 if (distances[i, j] != 0)
@@ -191,23 +196,28 @@ public class BoardManager : MonoBehaviour
                 }
             }
         }
+
+        for (int i = 0; i < objectCount; i++)
+        {
+            Item itemToLocate = GenerateItem(i, unitycoord[i]);
+            items[i] = itemToLocate;
+        }
     }
 
     void SetM()
     {
         Debug.Log("Setting up MVC Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
-
     }
 
     // Instantiates an Item and places it on the position from the input
-    Item GenerateItem(int ItemNumber, Vector2 itemPosition)
+    Item GenerateItem(int itemNumber, Vector2 itemPosition)
     {
         GameObject instance = Instantiate(CityItemPrefab, itemPosition, Quaternion.identity) as GameObject;
-        if (GameManager.problemName == 'w'.ToString() && ItemNumber == GameManager.wcspp_instances[currInstance].startcity)
+        if (GameManager.problemName == 'w'.ToString() && itemNumber == GameManager.wcsppInstances[currInstance].startcity)
         {
             instance = Instantiate(StartCityPrefab, itemPosition, Quaternion.identity) as GameObject;
         }
-        else if (GameManager.problemName == 'w'.ToString() && ItemNumber == GameManager.wcspp_instances[currInstance].endcity)
+        else if (GameManager.problemName == 'w'.ToString() && itemNumber == GameManager.wcsppInstances[currInstance].endcity)
         {
             instance = Instantiate(EndCityPrefab, itemPosition, Quaternion.identity) as GameObject;
         }
@@ -215,16 +225,16 @@ public class BoardManager : MonoBehaviour
         canvas = GameObject.Find("Canvas");
         instance.transform.SetParent(canvas.GetComponent<Transform>(), false);
 
-        Item ItemInstance;
-        ItemInstance.gameItem = instance;
-        ItemInstance.CityButton = ItemInstance.gameItem.GetComponent<Button>();
-        ItemInstance.CityNumber = cities[ItemNumber];
-        ItemInstance.center = itemPosition;
+        Item itemInstance;
+        itemInstance.gameItem = instance;
+        itemInstance.CityButton = itemInstance.gameItem.GetComponent<Button>();
+        itemInstance.CityNumber = cities[itemNumber];
+        itemInstance.center = itemPosition;
 
-        //Setting the position in a separate line is importatant in order to set it according to global coordinates.
-        BoardFunctions.PlaceItem(ItemInstance, itemPosition);
+        // Setting the position in a separate line is importatant in order to set it according to global coordinates.
+        BoardFunctions.PlaceItem(itemInstance, itemPosition);
 
-        return (ItemInstance);
+        return itemInstance;
     }
 
     // Macro function that initializes the Board
@@ -254,7 +264,6 @@ public class BoardManager : MonoBehaviour
         }
         else if (GameManager.escena == "SetUp")
         {
-
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 GameFunctions.SetTimeStamp();
@@ -268,130 +277,139 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    //if clicking on the first city, light it up. after that, clicking on a city will fill the destination city, indicating you've travelled to it, and draw a
-    //connecting line between the city of departure and the destination
-    public void ClickOnItem(Item ItemToLocate)
+    // If clicking on the first city, light it up. after that, clicking on a city will fill the destination city,
+    // indicating you've travelled to it, and draw a connecting line between the city of departure and the destination
+    public void ClickOnItem(Item itemToLocate)
     {
         if (GameManager.problemName == 't'.ToString())
         {
-            TSPclick(ItemToLocate);
+            TSPclick(itemToLocate);
         }
 
         if (GameManager.problemName == 'w'.ToString())
         {
-            if (ClickValid(ItemToLocate))
+            if (ClickValid(itemToLocate))
             {
-                WCSPPclick(ItemToLocate);
+                WCSPPclick(itemToLocate);
             }
-
         }
 
         if (GameManager.problemName == 'm'.ToString())
         {
-            Mclick(ItemToLocate);
+            Mclick(itemToLocate);
         }
     }
 
-    void TSPclick(Item ItemToLocate)
+    void TSPclick(Item itemToLocate)
     {
         // If the city is NEW or is the ORIGIN city
-        if (!previouscities.Contains(ItemToLocate.CityNumber) || (previouscities.Count() == cities.Length && previouscities.First() == ItemToLocate.CityNumber))
+        if (!previouscities.Contains(itemToLocate.CityNumber) || (previouscities.Count() == cities.Length && previouscities.First() == itemToLocate.CityNumber))
         {
             if (previouscities.Count() == 0)
             {
-                LightFirstCity(ItemToLocate);
+                LightFirstCity(itemToLocate);
             }
             else
             {
-                DrawLine(ItemToLocate);
+                DrawLine(itemToLocate);
             }
 
-            AddCity(ItemToLocate);
+            AddCity(itemToLocate);
 
             SetDistanceText();
         }
-        else if (previouscities.Last() == ItemToLocate.CityNumber)
+        else if (previouscities.Last() == itemToLocate.CityNumber)
         {
-            EraseLine(ItemToLocate);
+            EraseLine(itemToLocate);
         }
     }
 
-    bool ClickValid(Item ItemToLocate)
+    bool ClickValid(Item itemToLocate)
     {
-        //distances[GameManager.wcspp_instances[currInstance].startcity, GameManager.wcspp_instances[currInstance].endcity] = 0;
-        // Allow the click if the this is the first city and is the Start City
         if (previouscities.Count() == 0)
-        {
-            return ItemToLocate.CityNumber == GameManager.wcspp_instances[currInstance].startcity;
+        {   
+            // Allow the click if the this is the first city and is the Start City
+            return itemToLocate.CityNumber == GameManager.wcsppInstances[currInstance].startcity;
         }
-        // Allow the click if the user is trying to cancel the last click, unless user is trying to unclick start city
-        else if (previouscities.Last() == ItemToLocate.CityNumber && previouscities.Count() != 1)
+        else if (previouscities.Last() == itemToLocate.CityNumber && previouscities.Count() != 1)
         {
-            EraseLine(ItemToLocate);
+            // Allow the click if the user is trying to cancel the last click, unless user is trying to unclick start city
+            EraseLine(itemToLocate);
             return false;
         }
-        // Disallow further clicks if the last city has already been clicked and the user is not trying to cancel the last click
-        else if (previouscities.Last() == GameManager.wcspp_instances[currInstance].endcity)
+        else if (previouscities.Last() == GameManager.wcsppInstances[currInstance].endcity)
         {
+            // Disallow further clicks if the last city has already been clicked and the user is not trying to cancel the last click
             return false;
         }
-        // In any other case...
-        // First check if the two distance between the two cities is non zero
-        else if (distances[previouscities.Last(), ItemToLocate.CityNumber] != 0)
+        else if (distances[previouscities.Last(), itemToLocate.CityNumber] != 0)
         {
+            // In any other case...
+            // First check if the two distance between the two cities is non zero
             // Then check if the current weight is less than the max weight
-            if ((Weight() + weights[previouscities.Last(), ItemToLocate.CityNumber]) > GameManager.wcspp_instances[currInstance].maxweight)
+            if ((Weight() + weights[previouscities.Last(), itemToLocate.CityNumber]) > GameManager.wcsppInstances[currInstance].maxweight)
             {
+                //StartCoroutine(ShowMessage());
+
+                GameObject heavyText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+                //Destroy(heavyText, 2);
+                //yield return new WaitForSeconds(2f);
+                //heavyText.SetActive(false);
+                heavyText.transform.SetParent(canvas.GetComponent<Transform>(), false);
+                Destroy(heavyText, 2);
+                Debug.Log("here");
                 return false;
             }
+
             return true;
         }
+
         return false;
     }
 
-    void WCSPPclick(Item ItemToLocate)
+    void WCSPPclick(Item itemToLocate)
     {
-        Debug.Log(previouscities.Count());
-        // If clicking the Start city
         if (previouscities.Count() == 0)
         {
-            //Debug.Log(ItemToLocate.CityNumber + "and" + currInstance + "also"+ GameManager.wcspp_instances[currInstance].startcity);
-            AddCity(ItemToLocate);
+            // If clicking the Start city
+            AddCity(itemToLocate);
 
             SetDistanceText();
         }
-        // If the Start city has already been clicked
-        else if (!previouscities.Contains(ItemToLocate.CityNumber))
-        {
-            DrawLine(ItemToLocate);
+        else if (!previouscities.Contains(itemToLocate.CityNumber))
+        {      
+            // If the Start city has already been clicked
+            DrawLine(itemToLocate);
 
-            AddCity(ItemToLocate);
+            AddCity(itemToLocate);
 
             SetDistanceText();
         }
     }
 
-    void Mclick(Item ItemToLocate)
+    void Mclick(Item itemToLocate)
     {
-        if (!previouscities.Contains(ItemToLocate.CityNumber) || (previouscities.Count() == cities.Length && previouscities.First() == ItemToLocate.CityNumber))
+        if (!previouscities.Contains(itemToLocate.CityNumber) || (previouscities.Count() == cities.Length && previouscities.First() == itemToLocate.CityNumber))
         {
             if (previouscities.Count() == 0)
             {
-                LightFirstCity(ItemToLocate);
+                LightFirstCity(itemToLocate);
             }
             else
             {
-                DrawLine(ItemToLocate);
+                DrawLine(itemToLocate);
             }
-            AddCity(ItemToLocate);
+
+            AddCity(itemToLocate);
 
             SetDistanceText();
         }
-        else if (previouscities.Last() == ItemToLocate.CityNumber)
+        else if (previouscities.Last() == itemToLocate.CityNumber)
         {
-            EraseLine(ItemToLocate);
+            EraseLine(itemToLocate);
         }
     }
+
     // Update is called once per frame
     void Update()
     {
@@ -402,13 +420,13 @@ public class BoardManager : MonoBehaviour
     }
 
     // Add current city to previous cities
-    void AddCity(Item ItemToLocate)
+    void AddCity(Item itemToLocate)
     {
-        previouscities.Add(ItemToLocate.CityNumber);
+        previouscities.Add(itemToLocate.CityNumber);
         citiesvisited = previouscities.Count();
 
         Click newclick;
-        newclick.CityNumber = ItemToLocate.CityNumber;
+        newclick.CityNumber = itemToLocate.CityNumber;
         newclick.State = 1;
         newclick.time = GameManager.timeQuestion - GameManager.tiempo;
         itemClicks.Add(newclick);
@@ -456,19 +474,18 @@ public class BoardManager : MonoBehaviour
             int weightT = Weight();
             WeightText.text = "Weight so far: " + weightT.ToString() + "kg";
         }
-
     }
 
     // Turn the light on around the first city to be clicked on
-    private void LightFirstCity(Item ItemToLocate)
+    private void LightFirstCity(Item itemToLocate)
     {
-        Light myLight = ItemToLocate.gameItem.GetComponent<Light>();
+        Light myLight = itemToLocate.gameItem.GetComponent<Light>();
         myLight.enabled = true;
     }
 
-    void DrawLine(Item ItemToLocate)
+    void DrawLine(Item itemToLocate)
     {
-        int cityofdestination = ItemToLocate.CityNumber;
+        int cityofdestination = itemToLocate.CityNumber;
         int cityofdeparture = previouscities[previouscities.Count() - 1];
 
         Vector2 coordestination = unitycoord[cityofdestination];
@@ -502,27 +519,33 @@ public class BoardManager : MonoBehaviour
         instance.transform.SetParent(canvas.GetComponent<Transform>(), false);
         instance.GetComponent<LineRenderer>().startWidth = 0.01f;
         instance.GetComponent<LineRenderer>().endWidth = 0.01f;
-        instance.GetComponent<LineRenderer>().material.color = Color.white;
+        instance.GetComponent<LineRenderer>().material.color = thinLineColor;
         instance.GetComponent<LineRenderer>().sortingOrder = 0;
         instance.GetComponent<LineRenderer>().SetPositions(coordinates);
 
         int wt = weights[cityofdeparture, cityofdestination];
         if (wt != 0)
         {
-            GameObject info = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
-            info.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            info.transform.position = (coordestination + coordeparture) / 2;
-            info.GetComponent<Text>().text = wt.ToString();
-        }
+            GameObject weight = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
+            weight.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            weight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.31f, 0);
+            weight.GetComponent<Text>().text = "W:" + wt.ToString();
+            weight.GetComponent<Text>().color = new Color(1f, 1f - (wt / 1000f), 0f);
 
+            GameObject distance = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
+            distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.31f, 0);
+            distance.GetComponent<Text>().text = "D:" + distances[cityofdeparture, cityofdestination].ToString();
+            distance.GetComponent<Text>().color = new Color(0f, 1f, 1f - (distances[cityofdeparture, cityofdestination] / 1500f));
+        }
     }
 
     // If double click on the previous city then change the destination city back to vacant, and delete the connecting line between the two cities
-    void EraseLine(Item ItemToLocate)
+    void EraseLine(Item itemToLocate)
     {
         if (previouscities.Count == 1 && GameManager.problemName != 'w'.ToString())
         {
-            ItemToLocate.gameItem.GetComponent<Light>().enabled = false;
+            itemToLocate.gameItem.GetComponent<Light>().enabled = false;
         }
 
         Destroy(lines[citiesvisited - 1]);
@@ -532,7 +555,7 @@ public class BoardManager : MonoBehaviour
 
         // Save the click
         Click newclick;
-        newclick.CityNumber = ItemToLocate.CityNumber;
+        newclick.CityNumber = itemToLocate.CityNumber;
         newclick.State = 0;
         newclick.time = GameManager.timeQuestion - GameManager.tiempo;
         itemClicks.Add(newclick);
@@ -541,17 +564,16 @@ public class BoardManager : MonoBehaviour
     // Turn off the light for the first city
     private void Lightoff()
     {
-        foreach (Item Item in Items)
+        foreach (Item item in items)
         {
-            if (Item.CityNumber == previouscities[0] && GameManager.problemName != 'w'.ToString())
+            if (item.CityNumber == previouscities[0] && GameManager.problemName != 'w'.ToString())
             {
                 Light myLight =
-                    Item.gameItem.GetComponent<Light>();
+                    item.gameItem.GetComponent<Light>();
                 myLight.enabled = false;
             }
         }
     }
-
 
     // Resets everything
     public void ResetClicked()
@@ -562,6 +584,7 @@ public class BoardManager : MonoBehaviour
             {
                 DestroyObject(lines[i]);
             }
+
             Lightoff();
             previouscities.Clear();
             SetDistanceText();
