@@ -35,8 +35,8 @@ public class GameManager : MonoBehaviour
     // Total time for this scene
     public static float totalTime;
 
-    // Time spent at the instance
-    public static float timeSkip;
+    // Time used for the instance
+    public static float timeTaken;
 
     // Current trial number in the current block
     public static int trial = 0;
@@ -93,6 +93,9 @@ public class GameManager : MonoBehaviour
     // distance travelled
     public static int Distancetravelled;
 
+    // current weight
+    public static int weightValue;
+
     // An array of all the instances, i.e importing everything using the structure below 
     public static TSPInstance[] tspInstances;
 
@@ -105,7 +108,6 @@ public class GameManager : MonoBehaviour
         public float[] coordinatesy;
 
         public int[,] distancematrix;
-        public int[] distancevector;
 
         public int ncities;
         public int maxdistance;
@@ -122,10 +124,8 @@ public class GameManager : MonoBehaviour
         public float[] coordinatesy;
 
         public int[,] distancematrix;
-        public int[] distancevector;
 
         public int[,] weightmatrix;
-        public int[] weightvector;
 
         public int ncities;
         public int maxweight;
@@ -307,19 +307,17 @@ public class GameManager : MonoBehaviour
         }
         else if (escena == "Trial")
         {
-            Distancetravelled = BoardManager.distanceTravelledValue;
-
             if (skipped)
             {
-                timeSkip = timeQuestion - tiempo;
+                timeTaken = timeQuestion - tiempo;
             }
             else
             {
-                timeSkip = timeQuestion;
+                timeTaken = timeQuestion;
             }
 
             // Save participant answer
-            InputOutputManager.Save(ExtractItemsSelected(itemClicks), timeSkip, string.Empty);
+            InputOutputManager.SaveTrialInfo(ExtractItemsSelected(itemClicks), timeTaken);
             InputOutputManager.SaveTimeStamp("ParticipantAnswer");
             InputOutputManager.SaveClicks(itemClicks);
 

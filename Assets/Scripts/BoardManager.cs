@@ -23,8 +23,6 @@ public class BoardManager : MonoBehaviour
     // Current counters
     public Text DistanceText;
     public Text WeightText;
-    public static int distanceTravelledValue;
-    public static int weightValue;
 
     // Coordinate vectors for this trial. ONLY INTEGERS allowed.
     private float[] cox;
@@ -117,6 +115,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    // Funciton to set up TSP instance
     void SetTSP()
     {
         Debug.Log("Setting up TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
@@ -151,6 +150,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    // Funciton to set up WCSPP instance
     void SetWCSPP()
     {
         Debug.Log("Setting up WCSPP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
@@ -204,6 +204,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    // Funciton to set up M instance
     void SetM()
     {
         Debug.Log("Setting up MVC Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
@@ -243,7 +244,7 @@ public class BoardManager : MonoBehaviour
         previouscities.Clear();
         itemClicks.Clear();
         GameManager.Distancetravelled = 0;
-        distanceTravelledValue = 0;
+        GameManager.weightValue = 0;
         SetInstance();
 
         keysON = true;
@@ -300,6 +301,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    // Funciton to determine if a TSP click is valid and draw connecting lines
     void TSPclick(Item itemToLocate)
     {
         // If the city is NEW or is the ORIGIN city
@@ -324,11 +326,20 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    // Funciton to determine if a WCSPP click is valid
     bool ClickValid(Item itemToLocate)
     {
         if (previouscities.Count() == 0)
-        {   
+        {
             // Allow the click if the this is the first city and is the Start City
+            if (itemToLocate.CityNumber != GameManager.wcsppInstances[currInstance].startcity)
+            {
+                GameObject notStartText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+                notStartText.transform.SetParent(canvas.GetComponent<Transform>(), false);
+                notStartText.GetComponent<Text>().text = "You must click the 'Start' city first";
+                Destroy(notStartText, 2);
+            }
+
             return itemToLocate.CityNumber == GameManager.wcsppInstances[currInstance].startcity;
         }
         else if (previouscities.Last() == itemToLocate.CityNumber && previouscities.Count() != 1)
@@ -337,9 +348,22 @@ public class BoardManager : MonoBehaviour
             EraseLine(itemToLocate);
             return false;
         }
+        else if (previouscities.Last() == itemToLocate.CityNumber && previouscities.Count() == 1)
+        {
+            // Disallow the click if the user is trying to unclick start city
+            GameObject unclickFirstText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+            unclickFirstText.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            unclickFirstText.GetComponent<Text>().text = "You have already selected the 'Start' city";
+            Destroy(unclickFirstText, 2);
+            return false;
+        }
         else if (previouscities.Last() == GameManager.wcsppInstances[currInstance].endcity)
         {
             // Disallow further clicks if the last city has already been clicked and the user is not trying to cancel the last click
+            GameObject finishedText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+            finishedText.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            finishedText.GetComponent<Text>().text = "You have already reached the destination";
+            Destroy(finishedText, 2);
             return false;
         }
         else if (distances[previouscities.Last(), itemToLocate.CityNumber] != 0)
@@ -347,26 +371,26 @@ public class BoardManager : MonoBehaviour
             // In any other case...
             // First check if the two distance between the two cities is non zero
             // Then check if the current weight is less than the max weight
-            if ((Weight() + weights[previouscities.Last(), itemToLocate.CityNumber]) > GameManager.wcsppInstances[currInstance].maxweight)
+            if ((GameManager.weightValue + weights[previouscities.Last(), itemToLocate.CityNumber]) > GameManager.wcsppInstances[currInstance].maxweight)
             {
-                //StartCoroutine(ShowMessage());
-
                 GameObject heavyText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
-                //Destroy(heavyText, 2);
-                //yield return new WaitForSeconds(2f);
-                //heavyText.SetActive(false);
                 heavyText.transform.SetParent(canvas.GetComponent<Transform>(), false);
+                heavyText.GetComponent<Text>().text = "Weight Limit Exceeded";
                 Destroy(heavyText, 2);
-                Debug.Log("here");
                 return false;
             }
 
             return true;
         }
 
+        GameObject invalidText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+        invalidText.transform.SetParent(canvas.GetComponent<Transform>(), false);
+        invalidText.GetComponent<Text>().text = "Invalid click, ask the researcher if you are unsure";
+        Destroy(invalidText, 2);
         return false;
     }
 
+    // Funciton to connect WCSPP cities and run relevant functions
     void WCSPPclick(Item itemToLocate)
     {
         if (previouscities.Count() == 0)
@@ -387,6 +411,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    // Funciton to determine if a M click is valid and draw connecting lines
     void Mclick(Item itemToLocate)
     {
         if (!previouscities.Contains(itemToLocate.CityNumber) || (previouscities.Count() == cities.Length && previouscities.First() == itemToLocate.CityNumber))
@@ -432,7 +457,8 @@ public class BoardManager : MonoBehaviour
         itemClicks.Add(newclick);
     }
 
-    public int DistanceTravelled()
+    // Function to calculate total distance thus far
+    public void CalcDistance()
     {
         int[] individualdistances = new int[previouscities.Count()];
         if (previouscities.Count() > 1)
@@ -443,12 +469,11 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        int distancetravelled = individualdistances.Sum();
-        distanceTravelledValue = distancetravelled;
-        return distancetravelled;
+        GameManager.Distancetravelled = individualdistances.Sum();
     }
 
-    public int Weight()
+    // Function to calculate total WCSPP weight thus far
+    public void CalcWeight()
     {
         int[] individualweights = new int[previouscities.Count()];
         if (previouscities.Count() > 1)
@@ -459,20 +484,19 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        int totalweight = individualweights.Sum();
-        weightValue = totalweight;
-        return weightValue;
+        GameManager.weightValue = individualweights.Sum();
     }
 
+    // Function to display distance and weight in Unity
     void SetDistanceText()
     {
-        int distanceT = DistanceTravelled();
-        DistanceText.text = "Distance so far: " + distanceT.ToString() + "km";
+        CalcDistance();
+        DistanceText.text = "Distance so far: " + GameManager.Distancetravelled.ToString() + "km";
 
         if (GameManager.problemName == 'w'.ToString())
         {
-            int weightT = Weight();
-            WeightText.text = "Weight so far: " + weightT.ToString() + "kg";
+            CalcWeight();
+            WeightText.text = "Weight so far: " + GameManager.weightValue.ToString() + "kg";
         }
     }
 
@@ -505,6 +529,7 @@ public class BoardManager : MonoBehaviour
         newLine[citiesvisited].SetPositions(coordinates);
     }
 
+    // Function to draw slim lines in WCSPP instances (to represent the valid connections) and to display distance & weight information
     void DrawSlimLine(int cityofdeparture, int cityofdestination)
     {
         Vector2 coordestination = unitycoord[cityofdestination];
