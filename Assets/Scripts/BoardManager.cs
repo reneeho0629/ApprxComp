@@ -145,6 +145,17 @@ public class BoardManager : MonoBehaviour
         items = new Item[objectCount];
         for (int i = 0; i < objectCount; i++)
         {
+            for (int j = 0; j < objectCount; j++)
+            {
+                if (distances[i, j] != 0)
+                {
+                    DrawSlimLine(i, j);
+                }
+            }
+        }
+
+        for (int i = 0; i < objectCount; i++)
+        {
             Item itemToLocate = GenerateItem(i, unitycoord[i]);
             items[i] = itemToLocate;
         }
@@ -548,21 +559,34 @@ public class BoardManager : MonoBehaviour
         instance.GetComponent<LineRenderer>().sortingOrder = 0;
         instance.GetComponent<LineRenderer>().SetPositions(coordinates);
 
-        int wt = weights[cityofdeparture, cityofdestination];
-        if (wt != 0)
+        if (GameManager.problemName == 't'.ToString())
         {
+            // TSP instance
+            int dt = distances[cityofdeparture, cityofdestination];
+            GameObject distance = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
+            distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            distance.transform.position = ((coordestination + coordeparture) / 2);
+            distance.GetComponent<Text>().text = "D:" + dt.ToString();
+            distance.GetComponent<Text>().color = new Color(dt / 1000f, 1f, 0f);
+        }
+        else if (GameManager.problemName == 'w'.ToString())
+        {
+            // WCSPP Instance
+            int wt = weights[cityofdeparture, cityofdestination];
             GameObject weight = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
             weight.transform.SetParent(canvas.GetComponent<Transform>(), false);
             weight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.31f, 0);
             weight.GetComponent<Text>().text = "W:" + wt.ToString();
             weight.GetComponent<Text>().color = new Color(1f, 1f - (wt / 1000f), 0f);
 
+            int dt = distances[cityofdeparture, cityofdestination];
             GameObject distance = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
             distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
             distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.31f, 0);
-            distance.GetComponent<Text>().text = "D:" + distances[cityofdeparture, cityofdestination].ToString();
-            distance.GetComponent<Text>().color = new Color(0f, 1f, 1f - (distances[cityofdeparture, cityofdestination] / 1500f));
+            distance.GetComponent<Text>().text = "D:" + dt.ToString();
+            distance.GetComponent<Text>().color = new Color(dt / 1000f, 1f, 0f);
         }
+
     }
 
     // If double click on the previous city then change the destination city back to vacant, and delete the connecting line between the two cities
