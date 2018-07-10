@@ -87,6 +87,10 @@ public class GameManager : MonoBehaviour
     public static int[] wcsppRandomization;
     public static int[] mRandomization;
 
+    // A list of floats to record participant performance
+    public static List<float> perf = new List<float>();
+    public static float performance;
+
     // The order of the Problems to be presented
     public static List<string> problemOrder;
 
@@ -98,6 +102,10 @@ public class GameManager : MonoBehaviour
 
     // An array of all the instances, i.e importing everything using the structure below 
     public static TSPInstance[] tspInstances;
+
+    // Keep track of total payment
+    // Default value is the show up fee
+    public static float payAmount = 5f;
 
     // A struct that contains the parameters of each TSP instance
     public struct TSPInstance
@@ -111,6 +119,8 @@ public class GameManager : MonoBehaviour
 
         public int ncities;
         public int maxdistance;
+
+        public int solution;
     }
 
     // An array of all the instances, i.e importing everything using the structure below 
@@ -132,6 +142,8 @@ public class GameManager : MonoBehaviour
 
         public int startcity;
         public int endcity;
+
+        public int solution;
     }
 
     // Use this for initialization
@@ -163,12 +175,13 @@ public class GameManager : MonoBehaviour
     void InitGame()
     {
         /* Scene Order
-         * 0= setup
-         * 1= trial game
-         * 2= intertrial rest
-         * 3= interblock rest
-         * 4= interproblem rest
-         * 5= end
+         * 0= Setup
+         * 1= Trial game
+         * 2= Intertrial rest
+         * 3= Interblock rest
+         * 4= Interproblem rest
+         * 5= End
+         * 6= Payment
          */
 
         // Selects the active scene, and call it "escena" - that's Spanish for "scene".
@@ -238,16 +251,66 @@ public class GameManager : MonoBehaviour
             skipButton = GameObject.Find("Skip").GetComponent<Button>();
             skipButton.onClick.AddListener(SkipClicked);
         }
-        else if (escena == "end")
+        else if (escena == "End")
         {
             showTimer = false;
+
+            skipButton = GameObject.Find("Skip").GetComponent<Button>();
+            skipButton.onClick.AddListener(SkipClicked);
         }
+        else if (escena == "Payment")
+        {
+            showTimer = false;
+
+            Text one = GameObject.Find("Uno").GetComponent<Text>();
+            one.text = DisplayPerf(0);
+
+            Text two = GameObject.Find("Dos").GetComponent<Text>();
+            two.text = DisplayPerf(1);
+
+            Text three = GameObject.Find("Tres").GetComponent<Text>();
+            three.text = DisplayPerf(2);
+
+            Text pay = GameObject.Find("PayText").GetComponent<Text>();
+            pay.text = "Total Payment: $" + payAmount.ToString();
+        }
+    }
+
+    // Function to display user performance (last scene)
+    public static string DisplayPerf(int problemNumber)
+    {
+        string perfText = "";
+
+        string probName = problemOrder[problemNumber];
+
+        if (probName == 't'.ToString())
+        {
+            // TSP instance
+            perfText += "TSP:";
+        }
+        else if (probName == 'w'.ToString())
+        {
+            // WCSPP Instance
+            perfText += "WCSPP:";
+        }
+        else if (probName == 'm'.ToString())
+        {
+            // M Instance
+            perfText += "MVC:";
+        }
+
+        for (int i = problemNumber * numberOfInstances; i < numberOfInstances + problemNumber * numberOfInstances; i++)
+        {
+            payAmount += perf[i];
+            perfText += " " + perf[i] + ";";
+        }
+        return perfText;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if ((escena != "SetUp") && (escena != "end"))
+        if ((escena != "SetUp") && (escena != "Payment") && (escena != "End"))
         {
             StartTimer();
         }
@@ -317,6 +380,9 @@ public class GameManager : MonoBehaviour
             }
 
             // Save participant answer
+            performance = (float)Distancetravelled / BoardManager.solution;
+            perf.Add(performance);
+
             InputOutputManager.SaveTrialInfo(ExtractItemsSelected(itemClicks), timeTaken);
             InputOutputManager.SaveTimeStamp("ParticipantAnswer");
             InputOutputManager.SaveClicks(itemClicks);
@@ -335,6 +401,10 @@ public class GameManager : MonoBehaviour
         else if (escena == "InterProblemRest")
         {
             ChangeToNextTrial();
+        }
+        else if (escena == "End")
+        {
+            SceneManager.LoadScene("Payment");
         }
     }
 
@@ -390,7 +460,7 @@ public class GameManager : MonoBehaviour
         {
             itemsInS = itemsInS.Remove(itemsInS.Length - 1);
         }
-        
+
         return itemsInS;
     }
 

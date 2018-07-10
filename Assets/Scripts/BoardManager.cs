@@ -30,6 +30,7 @@ public class BoardManager : MonoBehaviour
     private int[] cities;
     private int[,] distances;
     private int[,] weights;
+    public static int solution;
 
     // Should the key be working? Initially disabled
     public static bool keysON = false;
@@ -119,7 +120,7 @@ public class BoardManager : MonoBehaviour
     void SetTSP()
     {
         Debug.Log("Setting up TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
-        
+
         // current instance
         currInstance = GameManager.tspRandomization[GameManager.TotalTrial - 1];
 
@@ -137,6 +138,8 @@ public class BoardManager : MonoBehaviour
 
         cities = GameManager.tspInstances[currInstance].cities;
         distances = GameManager.tspInstances[currInstance].distancematrix;
+
+        solution = GameManager.tspInstances[currInstance].solution;
 
         // Number of objects
         int objectCount = coy.Length;
@@ -191,6 +194,8 @@ public class BoardManager : MonoBehaviour
         cities = GameManager.wcsppInstances[currInstance].cities;
         distances = GameManager.wcsppInstances[currInstance].distancematrix;
         weights = GameManager.wcsppInstances[currInstance].weightmatrix;
+
+        solution = GameManager.tspInstances[currInstance].solution;
 
         // Number of objects
         int objectCount = coy.Length;
@@ -377,6 +382,15 @@ public class BoardManager : MonoBehaviour
             Destroy(finishedText, 2);
             return false;
         }
+        else if (previouscities.Contains(itemToLocate.CityNumber))
+        {
+            // Disallow clicks on cities already clicked
+            GameObject finishedText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+            finishedText.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            finishedText.GetComponent<Text>().text = "You have already selected this city";
+            Destroy(finishedText, 2);
+            return false;
+        }
         else if (distances[previouscities.Last(), itemToLocate.CityNumber] != 0)
         {
             // In any other case...
@@ -393,6 +407,7 @@ public class BoardManager : MonoBehaviour
 
             return true;
         }
+
 
         GameObject invalidText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
         invalidText.transform.SetParent(canvas.GetComponent<Transform>(), false);
@@ -411,8 +426,8 @@ public class BoardManager : MonoBehaviour
 
             SetDistanceText();
         }
-        else if (!previouscities.Contains(itemToLocate.CityNumber))
-        {      
+        else
+        {
             // If the Start city has already been clicked
             DrawLine(itemToLocate);
 

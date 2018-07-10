@@ -8,3 +8,4 @@ solution:1
 param:0.87
 MZN:/Users/nitiny/kpc/output/cases/tsp/tsp-20-2/mzn/6/6-0.87.dzn
 type:2
+tempsolution:9999

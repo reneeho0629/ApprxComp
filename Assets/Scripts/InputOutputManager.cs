@@ -139,7 +139,8 @@ public class InputOutputManager : MonoBehaviour
             tspInstances[k].distancematrix = StringToMatrix(dict["distancevector"]);
 
             tspInstances[k].ncities = int.Parse(dict["ncities"]);
-            tspInstances[k].maxdistance = int.Parse(dict["maxdistance"]);
+
+            tspInstances[k].solution = int.Parse(dict["solution"]);
         }
 
         return tspInstances;
@@ -152,7 +153,7 @@ public class InputOutputManager : MonoBehaviour
         GameManager.WCSPPInstance[] wcsppInstances = new GameManager.WCSPPInstance[numberOfInstances];
 
         //for (int k = 0; k < numberOfInstances; k++)
-        for (int k = 0; k < 2; k++)
+        for (int k = 0; k < 3; k++)
         {
             // create a dictionary where all the variables and definitions are strings
             var dict = new Dictionary<string, string>();
@@ -177,6 +178,8 @@ public class InputOutputManager : MonoBehaviour
 
             wcsppInstances[k].startcity = int.Parse(dict["startcity"]);
             wcsppInstances[k].endcity = int.Parse(dict["endcity"]);
+
+            wcsppInstances[k].solution = int.Parse(dict["solution"]);
         }
 
         return wcsppInstances;
@@ -201,7 +204,7 @@ public class InputOutputManager : MonoBehaviour
         string[] lines = new string[3];
         lines[0] = "PartcipantID:" + participantID;
         lines[1] = "RandID:" + randomisationID;
-        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber";
+        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber;performance";
         using (StreamWriter outputFile = new StreamWriter(folderPathSave + tspIdentifier + "TrialInfo.txt", true))
         {
             WriteToFile(outputFile, lines);
@@ -237,7 +240,7 @@ public class InputOutputManager : MonoBehaviour
         string[] lines = new string[3];
         lines[0] = "PartcipantID:" + participantID;
         lines[1] = "RandID:" + randomisationID;
-        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;finalweight;instanceNumber";
+        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;finalweight;instanceNumber;performance";
         using (StreamWriter outputFile = new StreamWriter(folderPathSave + wcsppIdentifier + "TrialInfo.txt", true))
         {
             WriteToFile(outputFile, lines);
@@ -273,7 +276,7 @@ public class InputOutputManager : MonoBehaviour
         string[] lines = new string[3];
         lines[0] = "PartcipantID:" + participantID;
         lines[1] = "RandID:" + randomisationID;
-        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber";
+        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber;performance";
         using (StreamWriter outputFile = new StreamWriter(folderPathSave + mIdentifier + "TrialInfo.txt", true))
         {
             WriteToFile(outputFile, lines);
@@ -315,7 +318,7 @@ public class InputOutputManager : MonoBehaviour
 
             // what to save and the order in which to do so
             string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + timeSpent + ";" + itemsSelected + ";"
-                + GameManager.Distancetravelled + ";" + instanceNum;
+                + GameManager.Distancetravelled + ";" + instanceNum + ";" + GameManager.performance;
 
             // Where to save
             using (StreamWriter outputFile = new StreamWriter(folderPathSave + tspIdentifier + "TrialInfo.txt", true))
@@ -332,7 +335,7 @@ public class InputOutputManager : MonoBehaviour
 
             // what to save and the order in which to do so
             string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + timeSpent + ";" + itemsSelected + ";"
-                + GameManager.Distancetravelled + ";" + GameManager.weightValue + ";" + instanceNum;
+                + GameManager.Distancetravelled + ";" + GameManager.weightValue + ";" + instanceNum + ";" + GameManager.performance;
 
             // Where to save
             using (StreamWriter outputFile = new StreamWriter(folderPathSave + wcsppIdentifier + "TrialInfo.txt", true))
@@ -349,7 +352,7 @@ public class InputOutputManager : MonoBehaviour
 
             // what to save and the order in which to do so
             string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + timeSpent + ";" + itemsSelected + ";" + GameManager.Distancetravelled + ";"
-                + instanceNum;
+                + instanceNum + ";" + GameManager.performance;
 
             // Where to save
             using (StreamWriter outputFile = new StreamWriter(folderPathSave + mIdentifier + "TrialInfo.txt", true))
