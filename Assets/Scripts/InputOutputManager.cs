@@ -31,11 +31,12 @@ public class InputOutputManager : MonoBehaviour
 
     public static Dictionary<string, string> dict;
 
+    // Function to read all instance files and save output file headers
     public static void LoadGame()
     {
         tspIdentifier = "TSP_" + participantID + "_" + randomisationID + "_" + dateID + "_";
         wcsppIdentifier = "WCSPP_" + participantID + "_" + randomisationID + "_" + dateID + "_";
-        mIdentifier = "M_" + participantID + "_" + randomisationID + "_" + dateID + "_";
+        mIdentifier = "MTSP_" + participantID + "_" + randomisationID + "_" + dateID + "_";
 
         folderPathLoad = Application.dataPath + inputFolder;
         folderPathLoadInstances = Application.dataPath + inputFolderInstances;
@@ -48,7 +49,8 @@ public class InputOutputManager : MonoBehaviour
         GameManager.AssignVariables(dict);
 
         // Load and process all instance parameters
-        GameManager.tspInstances = LoadTSPInstances(GameManager.numberOfInstances);
+        GameManager.tspInstances = LoadTSPInstances(GameManager.numberOfInstances, "t");
+        GameManager.mtspInstances = LoadTSPInstances(GameManager.numberOfInstances, "m");
         GameManager.wcsppInstances = LoadWCSPPInstances(GameManager.numberOfInstances);
 
         // Create output file headers
@@ -100,6 +102,7 @@ public class InputOutputManager : MonoBehaviour
         return dict;
     }
 
+    // Store an input file "sr" in a dictionary "dict"
     private static void ReadToDict(StreamReader sr, Dictionary<string, string> dict)
     {
         string line;
@@ -116,7 +119,7 @@ public class InputOutputManager : MonoBehaviour
 
     // Reads all TSP instances from .txt files.
     // The instances are stored as tspinstances structs in an array called "tspinstances"
-    private static GameManager.TSPInstance[] LoadTSPInstances(int numberOfInstances)
+    private static GameManager.TSPInstance[] LoadTSPInstances(int numberOfInstances, string type)
     {
         GameManager.TSPInstance[] tspInstances = new GameManager.TSPInstance[numberOfInstances];
 
@@ -126,7 +129,7 @@ public class InputOutputManager : MonoBehaviour
             var dict = new Dictionary<string, string>();
 
             // Use streamreader to read the input files if there are lines to read
-            using (StreamReader sr = new StreamReader(folderPathLoadInstances + "t" + (k + 1) + ".txt"))
+            using (StreamReader sr = new StreamReader(folderPathLoadInstances + type + (k + 1) + ".txt"))
             {
                 ReadToDict(sr, dict);
             }
@@ -193,43 +196,45 @@ public class InputOutputManager : MonoBehaviour
         SaveTSPHeaders();
 
         SaveWCSPPHeaders();
-
-        SaveMHeaders();
     }
 
-    // Save headers for the TSP problem
+    // Save headers for the 2 TSP problems
     private static void SaveTSPHeaders()
     {
-        // Trial Info file headers
-        string[] lines = new string[3];
-        lines[0] = "PartcipantID:" + participantID;
-        lines[1] = "RandID:" + randomisationID;
-        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber;performance";
-        using (StreamWriter outputFile = new StreamWriter(folderPathSave + tspIdentifier + "TrialInfo.txt", true))
+        foreach (string ID in new List<string> {tspIdentifier, mIdentifier})
         {
-            WriteToFile(outputFile, lines);
-        }
 
-        // Time Stamps file headers
-        string[] lines1 = new string[4];
-        lines1[0] = "PartcipantID:" + participantID;
-        lines1[1] = "RandID:" + randomisationID;
-        lines1[2] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
-        lines1[3] = "block;trial;eventType;elapsedTime";
-        using (StreamWriter outputFile = new StreamWriter(folderPathSave + tspIdentifier + "TimeStamps.txt", true))
-        {
-            WriteToFile(outputFile, lines1);
-        }
+            // Trial Info file headers
+            string[] lines = new string[3];
+            lines[0] = "PartcipantID:" + participantID;
+            lines[1] = "RandID:" + randomisationID;
+            lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber;performance;timedOut(Yes(1)/No(0))";
+            using (StreamWriter outputFile = new StreamWriter(folderPathSave + ID + "TrialInfo.txt", true))
+            {
+                WriteToFile(outputFile, lines);
+            }
 
-        // Headers for Clicks file
-        string[] lines2 = new string[4];
-        lines2[0] = "PartcipantID:" + participantID;
-        lines2[1] = "RandID:" + randomisationID;
-        lines2[2] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
-        lines2[3] = "block;trial;citynumber(100=Reset);In(1)/Out(0)/Reset(3);time";
-        using (StreamWriter outputFile = new StreamWriter(folderPathSave + tspIdentifier + "Clicks.txt", true))
-        {
-            WriteToFile(outputFile, lines2);
+            // Time Stamps file headers
+            string[] lines1 = new string[4];
+            lines1[0] = "PartcipantID:" + participantID;
+            lines1[1] = "RandID:" + randomisationID;
+            lines1[2] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
+            lines1[3] = "block;trial;eventType;elapsedTime";
+            using (StreamWriter outputFile = new StreamWriter(folderPathSave + ID + "TimeStamps.txt", true))
+            {
+                WriteToFile(outputFile, lines1);
+            }
+
+            // Headers for Clicks file
+            string[] lines2 = new string[4];
+            lines2[0] = "PartcipantID:" + participantID;
+            lines2[1] = "RandID:" + randomisationID;
+            lines2[2] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
+            lines2[3] = "block;trial;citynumber(100=Reset);In(1)/Out(0)/Reset(3);time";
+            using (StreamWriter outputFile = new StreamWriter(folderPathSave + ID + "Clicks.txt", true))
+            {
+                WriteToFile(outputFile, lines2);
+            }
         }
     }
 
@@ -240,7 +245,7 @@ public class InputOutputManager : MonoBehaviour
         string[] lines = new string[3];
         lines[0] = "PartcipantID:" + participantID;
         lines[1] = "RandID:" + randomisationID;
-        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;finalweight;instanceNumber;performance";
+        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;finalweight;instanceNumber;performance;timedOut(Yes(1)/No(0))";
         using (StreamWriter outputFile = new StreamWriter(folderPathSave + wcsppIdentifier + "TrialInfo.txt", true))
         {
             WriteToFile(outputFile, lines);
@@ -269,64 +274,11 @@ public class InputOutputManager : MonoBehaviour
         }
     }
 
-    // Save headers for the M problem
-    private static void SaveMHeaders()
-    {
-        // Trial Info file headers
-        string[] lines = new string[3];
-        lines[0] = "PartcipantID:" + participantID;
-        lines[1] = "RandID:" + randomisationID;
-        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber;performance";
-        using (StreamWriter outputFile = new StreamWriter(folderPathSave + mIdentifier + "TrialInfo.txt", true))
-        {
-            WriteToFile(outputFile, lines);
-        }
-
-        // Time Stamps file headers
-        string[] lines1 = new string[4];
-        lines1[0] = "PartcipantID:" + participantID;
-        lines1[1] = "RandID:" + randomisationID;
-        lines1[2] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
-        lines1[3] = "block;trial;eventType;elapsedTime";
-        using (StreamWriter outputFile = new StreamWriter(folderPathSave + mIdentifier + "TimeStamps.txt", true))
-        {
-            WriteToFile(outputFile, lines1);
-        }
-
-        // Headers for Clicks file
-        string[] lines2 = new string[4];
-        lines2[0] = "PartcipantID:" + participantID;
-        lines2[1] = "RandID:" + randomisationID;
-        lines2[2] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
-        lines2[3] = "block;trial;citynumber(100=Reset);In(1)/Out(0)/Reset(3);time";
-        using (StreamWriter outputFile = new StreamWriter(folderPathSave + mIdentifier + "Clicks.txt", true))
-        {
-            WriteToFile(outputFile, lines2);
-        }
-    }
-
     // Saves the data of a trial to a .txt file with the participants ID as filename using StreamWriter.
     // If the file doesn't exist it creates it. Otherwise it adds on lines to the existing file.
     public static void SaveTrialInfo(string itemsSelected, float timeSpent)
     {
-        if (GameManager.problemName == 't'.ToString())
-        {
-            // Get the instance number for this trial (take the block number, subtract 1 because indexing starts at 0. Then multiply it
-            // by numberOfTrials (i.e. 10, 10 per block) and add the trial number of this block. Thus, the 2nd trial of block 2 will be
-            // instance number 12 overall) and add 1 because the instanceRandomization is linked to array numbering in C#, which starts at 0;
-            int instanceNum = GameManager.tspRandomization[GameManager.TotalTrial - 1] + 1;
-
-            // what to save and the order in which to do so
-            string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + timeSpent + ";" + itemsSelected + ";"
-                + GameManager.Distancetravelled + ";" + instanceNum + ";" + GameManager.performance;
-
-            // Where to save
-            using (StreamWriter outputFile = new StreamWriter(folderPathSave + tspIdentifier + "TrialInfo.txt", true))
-            {
-                outputFile.WriteLine(dataTrialText);
-            }
-        }
-        else if (GameManager.problemName == 'w'.ToString())
+        if (GameManager.problemName == 'w'.ToString())
         {
             // Get the instance number for this trial (take the block number, subtract 1 because indexing starts at 0. Then multiply it
             // by numberOfTrials (i.e. 10, 10 per block) and add the trial number of this block. Thus, the 2nd trial of block 2 will be
@@ -335,27 +287,27 @@ public class InputOutputManager : MonoBehaviour
 
             // what to save and the order in which to do so
             string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + timeSpent + ";" + itemsSelected + ";"
-                + GameManager.Distancetravelled + ";" + GameManager.weightValue + ";" + instanceNum + ";" + GameManager.performance;
+                + GameManager.Distancetravelled + ";" + GameManager.weightValue + ";" + instanceNum + ";" + GameManager.performance + ";" + GameManager.timedOut;
 
             // Where to save
-            using (StreamWriter outputFile = new StreamWriter(folderPathSave + wcsppIdentifier + "TrialInfo.txt", true))
+            using (StreamWriter outputFile = new StreamWriter(folderPathSave + GetID() + "TrialInfo.txt", true))
             {
                 outputFile.WriteLine(dataTrialText);
             }
         }
-        else if (GameManager.problemName == 'm'.ToString())
+        else if (GameManager.problemName == 't'.ToString() || GameManager.problemName == 'm'.ToString())
         {
             // Get the instance number for this trial (take the block number, subtract 1 because indexing starts at 0. Then multiply it
             // by numberOfTrials (i.e. 10, 10 per block) and add the trial number of this block. Thus, the 2nd trial of block 2 will be
             // instance number 12 overall) and add 1 because the instanceRandomization is linked to array numbering in C#, which starts at 0;
-            int instanceNum = GameManager.mRandomization[GameManager.TotalTrial - 1] + 1;
+            int instanceNum = GameManager.tspRandomization[GameManager.TotalTrial - 1] + 1;
 
             // what to save and the order in which to do so
-            string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + timeSpent + ";" + itemsSelected + ";" + GameManager.Distancetravelled + ";"
-                + instanceNum + ";" + GameManager.performance;
+            string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + timeSpent + ";" + itemsSelected + ";"
+                + GameManager.Distancetravelled + ";" + instanceNum + ";" + GameManager.performance + ";" + GameManager.timedOut;
 
             // Where to save
-            using (StreamWriter outputFile = new StreamWriter(folderPathSave + mIdentifier + "TrialInfo.txt", true))
+            using (StreamWriter outputFile = new StreamWriter(folderPathSave + GetID() + "TrialInfo.txt", true))
             {
                 outputFile.WriteLine(dataTrialText);
             }
@@ -363,39 +315,43 @@ public class InputOutputManager : MonoBehaviour
         // Options of streamwriter include: Write, WriteLine, WriteAsync, WriteLineAsync
     }
 
+
+    // Helper function that gets the right identifier depending on the current problem
+    public static string GetID()
+    {
+        if (GameManager.problemName == 't'.ToString())
+        {
+            return tspIdentifier;
+        }
+        else if (GameManager.problemName == 'w'.ToString())
+        {
+            return wcsppIdentifier;
+        }
+        return mIdentifier;
+    }
+
     // Saves the time stamp for a particular event type to the "TimeStamps" File
     // Event type: 1=ItemsNoQuestion; 11=ItemsWithQuestion; 2=AnswerScreen; 21=ParticipantsAnswer; 3=InterTrialScreen; 4=InterBlockScreen; 5=EndScreen
     public static void SaveTimeStamp(string eventType)
     {
-        if (GameManager.problemName == 't'.ToString())
+        if (GameManager.problemName == 'w'.ToString())
         {
             string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + eventType + ";" + GameFunctions.TimeStamp();
 
             string[] lines = { dataTrialText };
 
-            using (StreamWriter outputFile = new StreamWriter(folderPathSave + tspIdentifier + "TimeStamps.txt", true))
+            using (StreamWriter outputFile = new StreamWriter(folderPathSave + GetID() + "TimeStamps.txt", true))
             {
                 WriteToFile(outputFile, lines);
             }
         }
-        else if (GameManager.problemName == 'w'.ToString())
+        else if (GameManager.problemName == 't'.ToString() || GameManager.problemName == 'm'.ToString())
         {
             string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + eventType + ";" + GameFunctions.TimeStamp();
 
             string[] lines = { dataTrialText };
 
-            using (StreamWriter outputFile = new StreamWriter(folderPathSave + wcsppIdentifier + "TimeStamps.txt", true))
-            {
-                WriteToFile(outputFile, lines);
-            }
-        }
-        else if (GameManager.problemName == 'm'.ToString())
-        {
-            string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + eventType + ";" + GameFunctions.TimeStamp();
-
-            string[] lines = { dataTrialText };
-
-            using (StreamWriter outputFile = new StreamWriter(folderPathSave + mIdentifier + "TimeStamps.txt", true))
+            using (StreamWriter outputFile = new StreamWriter(folderPathSave + GetID() + "TimeStamps.txt", true))
             {
                 WriteToFile(outputFile, lines);
             }
@@ -408,7 +364,7 @@ public class InputOutputManager : MonoBehaviour
     {
         string folderPathSave = Application.dataPath + outputFolder;
 
-        if (GameManager.problemName == 't'.ToString())
+        if (GameManager.problemName == 'w'.ToString())
         {
             string[] lines = new string[itemClicks.Count];
             int i = 0;
@@ -418,12 +374,12 @@ public class InputOutputManager : MonoBehaviour
                 i++;
             }
 
-            using (StreamWriter outputFile = new StreamWriter(folderPathSave + tspIdentifier + "Clicks.txt", true))
+            using (StreamWriter outputFile = new StreamWriter(folderPathSave + GetID() + "Clicks.txt", true))
             {
                 WriteToFile(outputFile, lines);
             }
         }
-        else if (GameManager.problemName == 'w'.ToString())
+        else if (GameManager.problemName == 't'.ToString() || GameManager.problemName == 'm'.ToString())
         {
             string[] lines = new string[itemClicks.Count];
             int i = 0;
@@ -433,22 +389,7 @@ public class InputOutputManager : MonoBehaviour
                 i++;
             }
 
-            using (StreamWriter outputFile = new StreamWriter(folderPathSave + wcsppIdentifier + "Clicks.txt", true))
-            {
-                WriteToFile(outputFile, lines);
-            }
-        }
-        else if (GameManager.problemName == 'm'.ToString())
-        {
-            string[] lines = new string[itemClicks.Count];
-            int i = 0;
-            foreach (BoardManager.Click click in itemClicks)
-            {
-                lines[i] = GameManager.block + ";" + GameManager.trial + ";" + click.CityNumber + ";" + click.State + ";" + click.time;
-                i++;
-            }
-
-            using (StreamWriter outputFile = new StreamWriter(folderPathSave + mIdentifier + "Clicks.txt", true))
+            using (StreamWriter outputFile = new StreamWriter(folderPathSave + GetID() + "Clicks.txt", true))
             {
                 WriteToFile(outputFile, lines);
             }

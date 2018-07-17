@@ -19,7 +19,7 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    // Game Manager: It is a singleton (i.e. it is always one and the same it is nor destroyed nor duplicated)
+    // Game Manager: It is a singleton (i.e. it is always one and the same it is not destroyed nor duplicated)
     public static GameManager gameManager = null;
 
     // The reference to the script managing the board (interface/canvas).
@@ -85,9 +85,11 @@ public class GameManager : MonoBehaviour
     // The order of the Instances to be presented
     public static int[] tspRandomization;
     public static int[] wcsppRandomization;
-    public static int[] mRandomization;
+    public static int[] mtspRandomization;
 
     // A list of floats to record participant performance
+    // Performance should always be equal to or greater than 1.
+    // Due to the way it's calculated (participant answer/optimal solution), performance closer to 1 is better.
     public static List<float> perf = new List<float>();
     public static float performance;
 
@@ -100,12 +102,12 @@ public class GameManager : MonoBehaviour
     // current weight
     public static int weightValue;
 
-    // An array of all the instances, i.e importing everything using the structure below 
-    public static TSPInstance[] tspInstances;
+    // binary variable to keep track of whether the submission was due to time out or user choice
+    public static int timedOut;
 
-    // Keep track of total payment
-    // Default value is the show up fee
-    public static float payAmount = 5f;
+    // An array of all the TSP instances, i.e importing everything using the struct below 
+    public static TSPInstance[] tspInstances;
+    public static TSPInstance[] mtspInstances;
 
     // A struct that contains the parameters of each TSP instance
     public struct TSPInstance
@@ -118,7 +120,6 @@ public class GameManager : MonoBehaviour
         public int[,] distancematrix;
 
         public int ncities;
-        public int maxdistance;
 
         public int solution;
     }
@@ -145,6 +146,10 @@ public class GameManager : MonoBehaviour
 
         public int solution;
     }
+
+    // Keep track of total payment
+    // Default value is the show up fee
+    public static float payAmount = 5f;
 
     // Use this for initialization
     void Start()
@@ -231,21 +236,21 @@ public class GameManager : MonoBehaviour
 
             totalTime = tiempo = timeRest3;
 
+            problemName = problemOrder[currentProblem];
             currentProblem++;
-            problemName = problemOrder[currentProblem - 1];
 
-            Text quest = GameObject.Find("ProblemName").GetComponent<Text>();
+            Text nombre = GameObject.Find("ProblemName").GetComponent<Text>();
             if (problemName == 't'.ToString())
             {
-                quest.text = "In the next phase: TSP";
+                nombre.text = "Next Problem: TSP";
             }
             else if (problemName == 'w'.ToString())
             {
-                quest.text = "In the next phase: WCSPP";
+                nombre.text = "Next Problem: WCSPP";
             }
             else if (problemName == 'm'.ToString())
             {
-                quest.text = "In the next phase: MVC";
+                nombre.text = "Next Problem: Metric TSP";
             }
 
             skipButton = GameObject.Find("Skip").GetComponent<Button>();
@@ -296,7 +301,7 @@ public class GameManager : MonoBehaviour
         else if (probName == 'm'.ToString())
         {
             // M Instance
-            perfText += "MVC:";
+            perfText += "MTSP:";
         }
 
         for (int i = problemNumber * numberOfInstances; i < numberOfInstances + problemNumber * numberOfInstances; i++)
@@ -335,12 +340,13 @@ public class GameManager : MonoBehaviour
         wcsppRandomization = StrToInt(dictionary["wcsppRandomization"]);
 
         // Getting m randomisation parameters
-        mRandomization = StrToInt(dictionary["mRandomization"]);
+        mtspRandomization = StrToInt(dictionary["mRandomization"]);
 
         // Getting problem randomisation parameters
         problemOrder = StrToStr(dictionary["problemOrder"]);
     }
 
+    // Function to convert a string to a list of ints
     public static int[] StrToInt(string valueStr)
     {
         int[] targetList = Array.ConvertAll(valueStr.Substring(1, valueStr.Length - 2).Split(','), int.Parse);
@@ -352,7 +358,8 @@ public class GameManager : MonoBehaviour
 
         return targetList;
     }
-
+    
+    // Function to convert a string to a list of substrings
     public static List<string> StrToStr(string valueStr)
     {
         return valueStr.Substring(1, valueStr.Length - 2).Split(',').ToList();
@@ -477,10 +484,12 @@ public class GameManager : MonoBehaviour
         // When the time runs out:
         if (tiempo < 0)
         {
+            timedOut = 1;
             ChangeToNextScene(BoardManager.itemClicks, false);
         }
     }
 
+    // Change to next scene if the user clicks skip
     static void SkipClicked()
     {
         Debug.Log("Skip Clicked");

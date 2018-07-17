@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 // This script (a component of GameManager) initializes the board (i.e. screen).
 public class BoardManager : MonoBehaviour
@@ -86,6 +83,19 @@ public class BoardManager : MonoBehaviour
     // Current Instance number
     public int currInstance;
 
+    // Macro function that initializes the Board
+    public void SetupTrial()
+    {
+        previouscities.Clear();
+        itemClicks.Clear();
+        GameManager.Distancetravelled = 0;
+        GameManager.weightValue = 0;
+        GameManager.timedOut = 0;
+        SetInstance();
+
+        keysON = true;
+    }
+
     // Initializes the instance for this trial:
     // 1. Sets the question string using the instance (from the .txt files)
     // 2. The weight and value vectors are uploaded
@@ -98,57 +108,64 @@ public class BoardManager : MonoBehaviour
         LineItemPrefab = (GameObject)Resources.Load("LineItem");
         TextPrefab = (GameObject)Resources.Load("TextItem");
         BigTextPrefab = (GameObject)Resources.Load("BigTextItem");
-
-        if (GameManager.problemName == 't'.ToString())
-        {
-            // TSP instance
-            SetTSP();
-        }
-        else if (GameManager.problemName == 'w'.ToString())
-        {
-            // WCSPP Instance
-            SetWCSPP();
-        }
-        else if (GameManager.problemName == 'm'.ToString())
-        {
-            // M Instance
-            SetM();
-        }
-    }
-
-    // Funciton to set up TSP instance
-    void SetTSP()
-    {
-        Debug.Log("Setting up TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
-
-        // current instance
-        currInstance = GameManager.tspRandomization[GameManager.TotalTrial - 1];
-
-        // Display current distance
-        DistanceText = GameObject.Find("DistanceText").GetComponent<Text>();
-
+        
         // Display reset button
         Reset = GameObject.Find("Reset").GetComponent<Button>();
         Reset.onClick.AddListener(ResetClicked);
 
+        if (GameManager.problemName == 't'.ToString())
+        {
+            // TSP instance
+            Debug.Log("Setting up Metric TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
+            
+            // current instance
+            currInstance = GameManager.tspRandomization[GameManager.TotalTrial - 1];
+            SetTSP(GameManager.tspInstances[currInstance]);
+        }
+        else if (GameManager.problemName == 'w'.ToString())
+        {
+            // WCSPP Instance
+            Debug.Log("Setting up WCSPP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
+            
+            // current instance
+            currInstance = GameManager.wcsppRandomization[GameManager.TotalTrial - 1];
+            SetWCSPP(GameManager.wcsppInstances[currInstance]);
+        }
+        else if (GameManager.problemName == 'm'.ToString())
+        {
+            // Metric TSP Instance
+            Debug.Log("Setting up Euclidean TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
+            
+            // current instance
+            currInstance = GameManager.mtspRandomization[GameManager.TotalTrial - 1];
+            SetTSP(GameManager.mtspInstances[currInstance]);
+        }
+    }
+
+    // Funciton to set up regular & Metric TSP instance
+    void SetTSP(GameManager.TSPInstance currentInstance)
+    {
+        // Display current distance
+        DistanceText = GameObject.Find("DistanceText").GetComponent<Text>();
+
         // Coordinate of the cities
-        cox = GameManager.tspInstances[currInstance].coordinatesx;
-        coy = GameManager.tspInstances[currInstance].coordinatesy;
+        cox = currentInstance.coordinatesx;
+        coy = currentInstance.coordinatesy;
         unitycoord = BoardFunctions.CoordinateConvertor(cox, coy);
 
-        cities = GameManager.tspInstances[currInstance].cities;
-        distances = GameManager.tspInstances[currInstance].distancematrix;
+        cities = currentInstance.cities;
+        distances = currentInstance.distancematrix;
 
-        solution = GameManager.tspInstances[currInstance].solution;
+        solution = currentInstance.solution;
 
         // Number of objects
-        int objectCount = coy.Length;
+        int objectCount = currentInstance.ncities;
 
         // Store objects in a list
         items = new Item[objectCount];
         for (int i = 0; i < objectCount; i++)
         {
-            for (int j = 0; j < objectCount; j++)
+            for (int j = i; j < objectCount; j++)
             {
                 if (distances[i, j] != 0)
                 {
@@ -165,11 +182,8 @@ public class BoardManager : MonoBehaviour
     }
 
     // Funciton to set up WCSPP instance
-    void SetWCSPP()
+    void SetWCSPP(GameManager.WCSPPInstance currentInstance)
     {
-        Debug.Log("Setting up WCSPP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
-        currInstance = GameManager.wcsppRandomization[GameManager.TotalTrial - 1];
-
         // Display Max distance
         Text quest = GameObject.Find("Question").GetComponent<Text>();
         quest.text = "Max weight: " + GameManager.wcsppInstances[currInstance].maxweight + "kg";
@@ -182,29 +196,25 @@ public class BoardManager : MonoBehaviour
         WeightText = GameObject.Find("WeightText").GetComponent<Text>();
         WeightText.color = Color.red;
 
-        // Display reset button
-        Reset = GameObject.Find("Reset").GetComponent<Button>();
-        Reset.onClick.AddListener(ResetClicked);
-
         // Coordinate of the cities
-        cox = GameManager.wcsppInstances[currInstance].coordinatesx;
-        coy = GameManager.wcsppInstances[currInstance].coordinatesy;
+        cox = currentInstance.coordinatesx;
+        coy = currentInstance.coordinatesy;
         unitycoord = BoardFunctions.CoordinateConvertor(cox, coy);
 
-        cities = GameManager.wcsppInstances[currInstance].cities;
-        distances = GameManager.wcsppInstances[currInstance].distancematrix;
-        weights = GameManager.wcsppInstances[currInstance].weightmatrix;
+        cities = currentInstance.cities;
+        distances = currentInstance.distancematrix;
+        weights = currentInstance.weightmatrix;
 
-        solution = GameManager.tspInstances[currInstance].solution;
+        solution = currentInstance.solution;
 
         // Number of objects
-        int objectCount = coy.Length;
+        int objectCount = currentInstance.ncities;
 
         // Store objects in a list
         items = new Item[objectCount];
         for (int i = 0; i < objectCount; i++)
         {
-            for (int j = 0; j < objectCount; j++)
+            for (int j = i; j < objectCount; j++)
             {
                 if (distances[i, j] != 0)
                 {
@@ -218,12 +228,6 @@ public class BoardManager : MonoBehaviour
             Item itemToLocate = GenerateItem(i, unitycoord[i]);
             items[i] = itemToLocate;
         }
-    }
-
-    // Funciton to set up M instance
-    void SetM()
-    {
-        Debug.Log("Setting up MVC Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
     }
 
     // Instantiates an Item and places it on the position from the input
@@ -252,18 +256,6 @@ public class BoardManager : MonoBehaviour
         BoardFunctions.PlaceItem(itemInstance, itemPosition);
 
         return itemInstance;
-    }
-
-    // Macro function that initializes the Board
-    public void SetupTrial()
-    {
-        previouscities.Clear();
-        itemClicks.Clear();
-        GameManager.Distancetravelled = 0;
-        GameManager.weightValue = 0;
-        SetInstance();
-
-        keysON = true;
     }
 
     // Sets the triggers for pressing the corresponding keys
@@ -313,7 +305,7 @@ public class BoardManager : MonoBehaviour
 
         if (GameManager.problemName == 'm'.ToString())
         {
-            Mclick(itemToLocate);
+            TSPclick(itemToLocate);
         }
     }
 
@@ -437,30 +429,6 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    // Funciton to determine if a M click is valid and draw connecting lines
-    void Mclick(Item itemToLocate)
-    {
-        if (!previouscities.Contains(itemToLocate.CityNumber) || (previouscities.Count() == cities.Length && previouscities.First() == itemToLocate.CityNumber))
-        {
-            if (previouscities.Count() == 0)
-            {
-                LightFirstCity(itemToLocate);
-            }
-            else
-            {
-                DrawLine(itemToLocate);
-            }
-
-            AddCity(itemToLocate);
-
-            SetDistanceText();
-        }
-        else if (previouscities.Last() == itemToLocate.CityNumber)
-        {
-            EraseLine(itemToLocate);
-        }
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -574,7 +542,7 @@ public class BoardManager : MonoBehaviour
         instance.GetComponent<LineRenderer>().sortingOrder = 0;
         instance.GetComponent<LineRenderer>().SetPositions(coordinates);
 
-        if (GameManager.problemName == 't'.ToString())
+        if (GameManager.problemName == 't'.ToString() || GameManager.problemName == 'm'.ToString())
         {
             // TSP instance
             int dt = distances[cityofdeparture, cityofdestination];
@@ -646,7 +614,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int i = 0; i < lines.Length; i++)
             {
-                DestroyObject(lines[i]);
+                Destroy(lines[i]);
             }
 
             Lightoff();

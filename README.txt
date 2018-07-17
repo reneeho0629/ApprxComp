@@ -1,6 +1,10 @@
 ﻿Complexity of Approximation and Human Decision Making
 Unity 3D (C#) code.
 
+Problems used in this program (from lowest to highest difficulty):
+- FPTAS: Weight Constrained Shortest Path Problem (WCSPP) (instances start with "w")
+- PTAS: Minimum Metric/Euclidean Travelling Salesman Problem (MTSP) (instances start with "m")
+- Not in APX: Minimum Travelling Salesman Problem (TSP) (instances start with "t")
 
 Game controls:
 - Type your ID and click enter.
@@ -14,4 +18,4 @@ Input and Output files stored in Assets/StreamingAssets
 - Randomisation files and problem instances are stored in the "Instances" subfolder
 - Randomisation files are called x_param2.txt where x is a number between 1 and 50.
 - Instances start with a letter representing the problem type and followed by a number between 1 and 24.
-- e.g. "t1" for the first TSP instance; "w20" for the 20th WCSPP instance.
+- e.g. "t1" for the first TSP instance; "w20" for the 20th WCSPP instance
