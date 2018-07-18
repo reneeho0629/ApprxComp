@@ -388,6 +388,10 @@ public class GameManager : MonoBehaviour
 
             // Save participant answer
             performance = (float)Distancetravelled / BoardManager.solution;
+            if (timedOut == 1)
+            {
+                performance = 0;
+            }
             perf.Add(performance);
 
             InputOutputManager.SaveTrialInfo(ExtractItemsSelected(itemClicks), timeTaken);

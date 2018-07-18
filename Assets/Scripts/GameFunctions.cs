@@ -93,7 +93,7 @@ public class GameFunctions : MonoBehaviour
     public static void StartClicked()
     {
         Debug.Log("Start Button Clicked");
-        GameFunctions.SetTimeStamp();
+        SetTimeStamp();
         GameManager.ChangeToNextScene(BoardManager.itemClicks, false);
     }
 }

@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class BoardManager : MonoBehaviour
 {
     // Create a canvas where all the items are going to be placed
-    private GameObject canvas;
+    private static GameObject canvas;
 
     // Prefab of the Item interface configuration
     public static GameObject CityItemPrefab;
@@ -57,7 +57,7 @@ public class BoardManager : MonoBehaviour
     public List<Vector2> unitycoord = new List<Vector2>();
 
     // A list to store the previous city numbers
-    public List<int> previouscities = new List<int>();
+    public static List<int> previouscities = new List<int>();
 
     // The list of all the button clicks. Each event contains the following information:
     // ItemNumber (a number between 1 and the number of items.)
@@ -78,10 +78,10 @@ public class BoardManager : MonoBehaviour
     public LineRenderer[] newLine = new LineRenderer[100];
 
     // To keep track of the number of cities visited
-    public int citiesvisited = 0;
+    public static int citiesvisited = 0;
 
     // Current Instance number
-    public int currInstance;
+    public static int currInstance;
 
     // Macro function that initializes the Board
     public void SetupTrial()
@@ -176,8 +176,7 @@ public class BoardManager : MonoBehaviour
 
         for (int i = 0; i < objectCount; i++)
         {
-            Item itemToLocate = GenerateItem(i, unitycoord[i]);
-            items[i] = itemToLocate;
+            items[i] = GenerateItem(i, unitycoord[i]);
         }
     }
 
@@ -225,8 +224,7 @@ public class BoardManager : MonoBehaviour
 
         for (int i = 0; i < objectCount; i++)
         {
-            Item itemToLocate = GenerateItem(i, unitycoord[i]);
-            items[i] = itemToLocate;
+            items[i] = GenerateItem(i, unitycoord[i]);
         }
     }
 
@@ -265,7 +263,7 @@ public class BoardManager : MonoBehaviour
     {
         if (GameManager.escena == "Trial")
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow))
+            if (Input.GetKeyDown(KeyCode.UpArrow) && SubmissionValid())
             {
                 InputOutputManager.SaveTimeStamp("ParticipantSkip");
                 GameManager.ChangeToNextScene(itemClicks, true);
@@ -286,15 +284,53 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    // Used to determine if the participant's solution follows all rules
+    public static bool SubmissionValid()
+    {
+        if (GameManager.problemName == 'w'.ToString())
+        {
+            // Last city clicked is the destination
+            if (previouscities.Count() != 0 && previouscities.Last() == GameManager.wcsppInstances[currInstance].endcity)
+            {
+                return true;
+            }
+            GameObject invalidText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+            invalidText.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            invalidText.GetComponent<Text>().text = "Your have not reached the destination";
+            Destroy(invalidText, 2);
+        }
+        else if (GameManager.problemName == 't'.ToString())
+        {
+            // all cities have been selected
+            if (citiesvisited == GameManager.tspInstances[currInstance].ncities + 1)
+            {
+                return true;
+            }
+            GameObject notAll = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+            notAll.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            notAll.GetComponent<Text>().text = "You have not selected every city in this problem";
+            Destroy(notAll, 2);
+        }
+        else if (GameManager.problemName == 'm'.ToString())
+        {
+            // all cities have been selected
+            if (citiesvisited == GameManager.mtspInstances[currInstance].ncities + 1)
+            {
+                return true;
+            }
+            GameObject notAll = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+            notAll.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            notAll.GetComponent<Text>().text = "You have not selected every city in this problem";
+            Destroy(notAll, 2);
+        }
+        
+        return false;
+    }
+
     // If clicking on the first city, light it up. after that, clicking on a city will fill the destination city,
     // indicating you've travelled to it, and draw a connecting line between the city of departure and the destination
     public void ClickOnItem(Item itemToLocate)
     {
-        if (GameManager.problemName == 't'.ToString())
-        {
-            TSPclick(itemToLocate);
-        }
-
         if (GameManager.problemName == 'w'.ToString())
         {
             if (ClickValid(itemToLocate))
@@ -302,8 +338,7 @@ public class BoardManager : MonoBehaviour
                 WCSPPclick(itemToLocate);
             }
         }
-
-        if (GameManager.problemName == 'm'.ToString())
+        else if (GameManager.problemName == 't'.ToString() || GameManager.problemName == 'm'.ToString())
         {
             TSPclick(itemToLocate);
         }
@@ -312,9 +347,31 @@ public class BoardManager : MonoBehaviour
     // Funciton to determine if a TSP click is valid and draw connecting lines
     void TSPclick(Item itemToLocate)
     {
-        // If the city is NEW or is the ORIGIN city
-        if (!previouscities.Contains(itemToLocate.CityNumber) || (previouscities.Count() == cities.Length && previouscities.First() == itemToLocate.CityNumber))
+        if (previouscities.Count() != 0 && previouscities.Last() == itemToLocate.CityNumber)
         {
+            // If deselecting a city
+            EraseLine(itemToLocate);
+        }
+        else if (previouscities.Count() == cities.Length && previouscities.First() == itemToLocate.CityNumber)
+        {
+            // Allow the last click of the start city to complete the circuit
+            DrawLine(itemToLocate);
+
+            AddCity(itemToLocate);
+
+            SetDistanceText();
+        }
+        else if (previouscities.Contains(itemToLocate.CityNumber))
+        {
+            // Disallow clicks on cities already clicked
+            GameObject selectedText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+            selectedText.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            selectedText.GetComponent<Text>().text = "You have already selected this city";
+            Destroy(selectedText, 2);
+        }
+        else
+        {
+            // If the city is new (not already selected)
             if (previouscities.Count() == 0)
             {
                 LightFirstCity(itemToLocate);
@@ -327,10 +384,6 @@ public class BoardManager : MonoBehaviour
             AddCity(itemToLocate);
 
             SetDistanceText();
-        }
-        else if (previouscities.Last() == itemToLocate.CityNumber)
-        {
-            EraseLine(itemToLocate);
         }
     }
 
@@ -377,17 +430,15 @@ public class BoardManager : MonoBehaviour
         else if (previouscities.Contains(itemToLocate.CityNumber))
         {
             // Disallow clicks on cities already clicked
-            GameObject finishedText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
-            finishedText.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            finishedText.GetComponent<Text>().text = "You have already selected this city";
-            Destroy(finishedText, 2);
+            GameObject selectedText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+            selectedText.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            selectedText.GetComponent<Text>().text = "You have already selected this city";
+            Destroy(selectedText, 2);
             return false;
         }
         else if (distances[previouscities.Last(), itemToLocate.CityNumber] != 0)
         {
-            // In any other case...
-            // First check if the two distance between the two cities is non zero
-            // Then check if the current weight is less than the max weight
+            // In any other case... check if the current weight is less than the max weight
             if ((GameManager.weightValue + weights[previouscities.Last(), itemToLocate.CityNumber]) > GameManager.wcsppInstances[currInstance].maxweight)
             {
                 GameObject heavyText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
@@ -399,7 +450,14 @@ public class BoardManager : MonoBehaviour
 
             return true;
         }
-
+        else if (distances[previouscities.Last(), itemToLocate.CityNumber] == 0)
+        {
+            GameObject noPath = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+            noPath.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            noPath.GetComponent<Text>().text = "Invalid path, the two cities cannot be connected directly";
+            Destroy(noPath, 2);
+            return false;
+        }
 
         GameObject invalidText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
         invalidText.transform.SetParent(canvas.GetComponent<Transform>(), false);
