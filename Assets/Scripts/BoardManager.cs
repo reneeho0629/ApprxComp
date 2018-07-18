@@ -67,7 +67,7 @@ public class BoardManager : MonoBehaviour
 
     public struct Click
     {
-        // Citynumber (100=Reset). State: In(1)/Out(0)/Reset(3). Time in seconds
+        // Citynumber (citynumber or 100=Reset). State: In(1)/Out(0)/Invalid(2)/Reset(3). Time in seconds
         public int CityNumber;
         public int State;
         public float time;
@@ -90,7 +90,7 @@ public class BoardManager : MonoBehaviour
         itemClicks.Clear();
         GameManager.Distancetravelled = 0;
         GameManager.weightValue = 0;
-        GameManager.timedOut = 0;
+        GameManager.timedOut = 1;
         SetInstance();
 
         keysON = true;
@@ -116,7 +116,7 @@ public class BoardManager : MonoBehaviour
         if (GameManager.problemName == 't'.ToString())
         {
             // TSP instance
-            Debug.Log("Setting up Metric TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
+            Debug.Log("Setting up TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
             
             // current instance
             currInstance = GameManager.tspRandomization[GameManager.TotalTrial - 1];
@@ -263,7 +263,7 @@ public class BoardManager : MonoBehaviour
     {
         if (GameManager.escena == "Trial")
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow) && SubmissionValid())
+            if (Input.GetKeyDown(KeyCode.UpArrow) && SubmissionValid(false))
             {
                 InputOutputManager.SaveTimeStamp("ParticipantSkip");
                 GameManager.ChangeToNextScene(itemClicks, true);
@@ -285,43 +285,55 @@ public class BoardManager : MonoBehaviour
     }
 
     // Used to determine if the participant's solution follows all rules
-    public static bool SubmissionValid()
+    public static bool SubmissionValid(bool suppress)
     {
         if (GameManager.problemName == 'w'.ToString())
         {
             // Last city clicked is the destination
             if (previouscities.Count() != 0 && previouscities.Last() == GameManager.wcsppInstances[currInstance].endcity)
             {
+                GameManager.timedOut = 0;
                 return true;
             }
-            GameObject invalidText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
-            invalidText.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            invalidText.GetComponent<Text>().text = "Your have not reached the destination";
-            Destroy(invalidText, 2);
+            if (!suppress)
+            {
+                GameObject invalidText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+                invalidText.transform.SetParent(canvas.GetComponent<Transform>(), false);
+                invalidText.GetComponent<Text>().text = "Your have not reached the destination";
+                Destroy(invalidText, 2);
+            }
         }
         else if (GameManager.problemName == 't'.ToString())
         {
             // all cities have been selected
             if (citiesvisited == GameManager.tspInstances[currInstance].ncities + 1)
             {
+                GameManager.timedOut = 0;
                 return true;
             }
-            GameObject notAll = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
-            notAll.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            notAll.GetComponent<Text>().text = "You have not selected every city in this problem";
-            Destroy(notAll, 2);
+            if (!suppress)
+            {
+                GameObject notAll = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+                notAll.transform.SetParent(canvas.GetComponent<Transform>(), false);
+                notAll.GetComponent<Text>().text = "You have not selected every city in this problem";
+                Destroy(notAll, 2);
+            }
         }
         else if (GameManager.problemName == 'm'.ToString())
         {
             // all cities have been selected
             if (citiesvisited == GameManager.mtspInstances[currInstance].ncities + 1)
             {
+                GameManager.timedOut = 0;
                 return true;
             }
-            GameObject notAll = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
-            notAll.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            notAll.GetComponent<Text>().text = "You have not selected every city in this problem";
-            Destroy(notAll, 2);
+            if (!suppress)
+            {
+                GameObject notAll = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
+                notAll.transform.SetParent(canvas.GetComponent<Transform>(), false);
+                notAll.GetComponent<Text>().text = "You have not selected every city in this problem";
+                Destroy(notAll, 2);
+            }
         }
         
         return false;
@@ -364,6 +376,7 @@ public class BoardManager : MonoBehaviour
         else if (previouscities.Contains(itemToLocate.CityNumber))
         {
             // Disallow clicks on cities already clicked
+            AddInvalid(itemToLocate, 3);
             GameObject selectedText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
             selectedText.transform.SetParent(canvas.GetComponent<Transform>(), false);
             selectedText.GetComponent<Text>().text = "You have already selected this city";
@@ -395,6 +408,7 @@ public class BoardManager : MonoBehaviour
             // Allow the click if the this is the first city and is the Start City
             if (itemToLocate.CityNumber != GameManager.wcsppInstances[currInstance].startcity)
             {
+                AddInvalid(itemToLocate, 4);
                 GameObject notStartText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
                 notStartText.transform.SetParent(canvas.GetComponent<Transform>(), false);
                 notStartText.GetComponent<Text>().text = "You must click the 'Start' city first";
@@ -412,6 +426,7 @@ public class BoardManager : MonoBehaviour
         else if (previouscities.Last() == itemToLocate.CityNumber && previouscities.Count() == 1)
         {
             // Disallow the click if the user is trying to unclick start city
+            AddInvalid(itemToLocate, 5);
             GameObject unclickFirstText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
             unclickFirstText.transform.SetParent(canvas.GetComponent<Transform>(), false);
             unclickFirstText.GetComponent<Text>().text = "You have already selected the 'Start' city";
@@ -421,6 +436,7 @@ public class BoardManager : MonoBehaviour
         else if (previouscities.Last() == GameManager.wcsppInstances[currInstance].endcity)
         {
             // Disallow further clicks if the last city has already been clicked and the user is not trying to cancel the last click
+            AddInvalid(itemToLocate, 6);
             GameObject finishedText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
             finishedText.transform.SetParent(canvas.GetComponent<Transform>(), false);
             finishedText.GetComponent<Text>().text = "You have already reached the destination";
@@ -430,6 +446,7 @@ public class BoardManager : MonoBehaviour
         else if (previouscities.Contains(itemToLocate.CityNumber))
         {
             // Disallow clicks on cities already clicked
+            AddInvalid(itemToLocate, 7);
             GameObject selectedText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
             selectedText.transform.SetParent(canvas.GetComponent<Transform>(), false);
             selectedText.GetComponent<Text>().text = "You have already selected this city";
@@ -441,6 +458,7 @@ public class BoardManager : MonoBehaviour
             // In any other case... check if the current weight is less than the max weight
             if ((GameManager.weightValue + weights[previouscities.Last(), itemToLocate.CityNumber]) > GameManager.wcsppInstances[currInstance].maxweight)
             {
+                AddInvalid(itemToLocate, 8);
                 GameObject heavyText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
                 heavyText.transform.SetParent(canvas.GetComponent<Transform>(), false);
                 heavyText.GetComponent<Text>().text = "Weight Limit Exceeded";
@@ -452,6 +470,7 @@ public class BoardManager : MonoBehaviour
         }
         else if (distances[previouscities.Last(), itemToLocate.CityNumber] == 0)
         {
+            AddInvalid(itemToLocate, 9);
             GameObject noPath = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
             noPath.transform.SetParent(canvas.GetComponent<Transform>(), false);
             noPath.GetComponent<Text>().text = "Invalid path, the two cities cannot be connected directly";
@@ -459,11 +478,35 @@ public class BoardManager : MonoBehaviour
             return false;
         }
 
+        AddInvalid(itemToLocate, 10);
         GameObject invalidText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
         invalidText.transform.SetParent(canvas.GetComponent<Transform>(), false);
         invalidText.GetComponent<Text>().text = "Invalid click, ask the researcher if you are unsure";
         Destroy(invalidText, 2);
         return false;
+    }
+
+    // Adds invalid clicks to the list of clicks
+    void AddInvalid(Item itemToLocate, int reasonCode)
+    {
+        /* Here are the reasons why a click might be invalid....
+         * TSP:
+         * 3=have already selected this city
+         * 
+         * WCSPP:
+         * 4=must click the 'Start' city first
+         * 5=have already selected the 'Start' city
+         * 6=have already reached the destination
+         * 7=have already selected this city
+         * 8=Weight Limit Exceeded
+         * 9=Invalid path, the two cities cannot be connected directly
+         * 10=BEWARE: this should not occur... any other error is a 10.
+         */
+        Click newclick;
+        newclick.CityNumber = itemToLocate.CityNumber;
+        newclick.State = reasonCode;
+        newclick.time = GameManager.timeQuestion - GameManager.tiempo;
+        itemClicks.Add(newclick);
     }
 
     // Funciton to connect WCSPP cities and run relevant functions
@@ -493,6 +536,10 @@ public class BoardManager : MonoBehaviour
         if (keysON)
         {
             SetKeyInput();
+        }
+        if (SubmissionValid(true))
+        {
+            GameManager.timedOut = 2;
         }
     }
 
@@ -682,7 +729,7 @@ public class BoardManager : MonoBehaviour
 
             Click newclick;
             newclick.CityNumber = 100;
-            newclick.State = 3;
+            newclick.State = 2;
             newclick.time = GameManager.timeQuestion - GameManager.tiempo;
             itemClicks.Add(newclick);
         }

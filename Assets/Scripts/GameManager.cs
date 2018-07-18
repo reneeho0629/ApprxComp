@@ -388,7 +388,7 @@ public class GameManager : MonoBehaviour
 
             // Save participant answer
             performance = (float)Distancetravelled / BoardManager.solution;
-            if (timedOut == 1)
+            if (timedOut == 1 || timedOut == 2)
             {
                 performance = 0;
             }
@@ -487,8 +487,7 @@ public class GameManager : MonoBehaviour
 
         // When the time runs out:
         if (tiempo < 0)
-        {
-            timedOut = 1;
+        {            
             ChangeToNextScene(BoardManager.itemClicks, false);
         }
     }

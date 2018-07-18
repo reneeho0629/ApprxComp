@@ -208,7 +208,7 @@ public class InputOutputManager : MonoBehaviour
             string[] lines = new string[3];
             lines[0] = "PartcipantID:" + participantID;
             lines[1] = "RandID:" + randomisationID;
-            lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber;performance;timedOut(Yes(1)/No(0))";
+            lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber;performance;timedOut(Yes,neverValid(1)/Yes,previouslyValid(2)/No(0))";
             using (StreamWriter outputFile = new StreamWriter(folderPathSave + ID + "TrialInfo.txt", true))
             {
                 WriteToFile(outputFile, lines);
@@ -230,7 +230,7 @@ public class InputOutputManager : MonoBehaviour
             lines2[0] = "PartcipantID:" + participantID;
             lines2[1] = "RandID:" + randomisationID;
             lines2[2] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
-            lines2[3] = "block;trial;citynumber(100=Reset);In(1)/Out(0)/Reset(3);time";
+            lines2[3] = "block;trial;citynumber(100=Reset);Out(0)/In(1)/Reset(2)/Other;time";
             using (StreamWriter outputFile = new StreamWriter(folderPathSave + ID + "Clicks.txt", true))
             {
                 WriteToFile(outputFile, lines2);
@@ -245,7 +245,7 @@ public class InputOutputManager : MonoBehaviour
         string[] lines = new string[3];
         lines[0] = "PartcipantID:" + participantID;
         lines[1] = "RandID:" + randomisationID;
-        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;finalweight;instanceNumber;performance;timedOut(Yes(1)/No(0))";
+        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;finalweight;instanceNumber;performance;timedOut(Yes,neverValid(1)/Yes,previouslyValid(2)/No(0))";
         using (StreamWriter outputFile = new StreamWriter(folderPathSave + wcsppIdentifier + "TrialInfo.txt", true))
         {
             WriteToFile(outputFile, lines);
@@ -267,7 +267,7 @@ public class InputOutputManager : MonoBehaviour
         lines2[0] = "PartcipantID:" + participantID;
         lines2[1] = "RandID:" + randomisationID;
         lines2[2] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
-        lines2[3] = "block;trial;citynumber(100=Reset);In(1)/Out(0)/Reset(3);time";
+        lines2[3] = "block;trial;citynumber(100=Reset);Out(0)/In(1)/Reset(2)/Other;time";
         using (StreamWriter outputFile = new StreamWriter(folderPathSave + wcsppIdentifier + "Clicks.txt", true))
         {
             WriteToFile(outputFile, lines2);
@@ -359,7 +359,7 @@ public class InputOutputManager : MonoBehaviour
     }
 
     // Saves the time stamp of every click made on the items 
-    // block ; trial ; clicklist (i.e. item number ; itemIn? (1: selcting; 0:deselecting) ; time of the click with respect to the begining of the trial)
+    // block ; trial ; clicklist (i.e. item number ; itemIn? (1: selcting; 0:deselecting; 2: click invalid; 3: reset) ; time of the click with respect to the begining of the trial)
     public static void SaveClicks(List<BoardManager.Click> itemClicks)
     {
         string folderPathSave = Application.dataPath + outputFolder;
