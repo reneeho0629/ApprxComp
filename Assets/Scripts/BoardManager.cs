@@ -655,6 +655,7 @@ public class BoardManager : MonoBehaviour
             distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
             distance.transform.position = ((coordestination + coordeparture) / 2);
             distance.GetComponent<Text>().text = "D:" + dt.ToString();
+            distance.GetComponent<Text>().fontSize = 40;
             distance.GetComponent<Text>().color = new Color(dt / 1000f, 1f, 0f);
         }
         else if (GameManager.problemName == 'w'.ToString())
@@ -663,14 +664,14 @@ public class BoardManager : MonoBehaviour
             int wt = weights[cityofdeparture, cityofdestination];
             GameObject weight = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
             weight.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            weight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.31f, 0);
+            weight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.18f, 0);
             weight.GetComponent<Text>().text = "W:" + wt.ToString();
             weight.GetComponent<Text>().color = new Color(1f, 1f - (wt / 1000f), 0f);
 
             int dt = distances[cityofdeparture, cityofdestination];
             GameObject distance = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
             distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.31f, 0);
+            distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.18f, 0);
             distance.GetComponent<Text>().text = "D:" + dt.ToString();
             distance.GetComponent<Text>().color = new Color(dt / 1000f, 1f, 0f);
         }
@@ -733,5 +734,17 @@ public class BoardManager : MonoBehaviour
             newclick.time = GameManager.timeQuestion - GameManager.tiempo;
             itemClicks.Add(newclick);
         }
+    }
+
+    void OnMouseEnter()
+    {
+        Debug.Log("mouse entered");
+        //instantiatedObject = Instantiate(prefab, Vector3.zero, Quaternion.identity) as GameObject;
+    }
+
+    void OnMouseExit()
+    {
+        Debug.Log("mouse exit");
+        //Destroy(instantiatedObject);
     }
 }
