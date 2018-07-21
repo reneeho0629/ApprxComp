@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class BoardManager : MonoBehaviour
 {
     // Create a canvas where all the items are going to be placed
-    private static GameObject canvas;
+    public static GameObject canvas;
 
     // Prefab of the Item interface configuration
     public static GameObject CityItemPrefab;
@@ -22,11 +22,11 @@ public class BoardManager : MonoBehaviour
     public Text WeightText;
 
     // Coordinate vectors for this trial. ONLY INTEGERS allowed.
-    private float[] cox;
-    private float[] coy;
-    private int[] cities;
-    private int[,] distances;
-    private int[,] weights;
+    public static float[] cox;
+    public static float[] coy;
+    public static int[] cities;
+    public static int[,] distances;
+    public static int[,] weights;
     public static int solution;
 
     // Should the key be working? Initially disabled
@@ -54,7 +54,7 @@ public class BoardManager : MonoBehaviour
     private Item[] items;
 
     // A list to store the unity coordinates of the vertices
-    public List<Vector2> unitycoord = new List<Vector2>();
+    public static List<Vector2> unitycoord = new List<Vector2>();
 
     // A list to store the previous city numbers
     public static List<int> previouscities = new List<int>();
@@ -169,7 +169,7 @@ public class BoardManager : MonoBehaviour
             {
                 if (distances[i, j] != 0)
                 {
-                    DrawSlimLine(i, j);
+                    DrawSlimLine(i, j, 0.01f);
                 }
             }
         }
@@ -217,7 +217,7 @@ public class BoardManager : MonoBehaviour
             {
                 if (distances[i, j] != 0)
                 {
-                    DrawSlimLine(i, j);
+                    DrawSlimLine(i, j, 0.01f);
                 }
             }
         }
@@ -629,7 +629,7 @@ public class BoardManager : MonoBehaviour
     }
 
     // Function to draw slim lines in WCSPP instances (to represent the valid connections) and to display distance & weight information
-    void DrawSlimLine(int cityofdeparture, int cityofdestination)
+    public static void DrawSlimLine(int cityofdeparture, int cityofdestination, float linewidth)
     {
         Vector2 coordestination = unitycoord[cityofdestination];
         Vector2 coordeparture = unitycoord[cityofdeparture];
@@ -641,8 +641,8 @@ public class BoardManager : MonoBehaviour
         GameObject instance = Instantiate(LineItemPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
         canvas = GameObject.Find("Canvas");
         instance.transform.SetParent(canvas.GetComponent<Transform>(), false);
-        instance.GetComponent<LineRenderer>().startWidth = 0.01f;
-        instance.GetComponent<LineRenderer>().endWidth = 0.01f;
+        instance.GetComponent<LineRenderer>().startWidth = linewidth;
+        instance.GetComponent<LineRenderer>().endWidth = linewidth;
         instance.GetComponent<LineRenderer>().material.color = thinLineColor;
         instance.GetComponent<LineRenderer>().sortingOrder = 0;
         instance.GetComponent<LineRenderer>().SetPositions(coordinates);
@@ -655,7 +655,6 @@ public class BoardManager : MonoBehaviour
             distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
             distance.transform.position = ((coordestination + coordeparture) / 2);
             distance.GetComponent<Text>().text = "D:" + dt.ToString();
-            distance.GetComponent<Text>().fontSize = 40;
             distance.GetComponent<Text>().color = new Color(dt / 1000f, 1f, 0f);
         }
         else if (GameManager.problemName == 'w'.ToString())
@@ -734,17 +733,5 @@ public class BoardManager : MonoBehaviour
             newclick.time = GameManager.timeQuestion - GameManager.tiempo;
             itemClicks.Add(newclick);
         }
-    }
-
-    void OnMouseEnter()
-    {
-        Debug.Log("mouse entered");
-        //instantiatedObject = Instantiate(prefab, Vector3.zero, Quaternion.identity) as GameObject;
-    }
-
-    void OnMouseExit()
-    {
-        Debug.Log("mouse exit");
-        //Destroy(instantiatedObject);
     }
 }

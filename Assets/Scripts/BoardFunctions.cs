@@ -32,6 +32,7 @@ public class BoardFunctions : MonoBehaviour
     {
         // Setting the position in a separate line is importatant in order to set it according to global coordinates.
         itemToLocate.gameItem.transform.position = position;
+        itemToLocate.CityButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = itemToLocate.CityNumber.ToString();
         itemToLocate.CityButton.onClick.AddListener(delegate { GameManager.gameManager.boardScript.ClickOnItem(itemToLocate); });
     }
 
