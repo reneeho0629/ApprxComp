@@ -135,7 +135,7 @@ public class InputOutputManager : MonoBehaviour
             }
 
             // Convert (most of them) to integers, with variables and literals being arrays and the others single literals
-            tspInstances[k].cities = Array.ConvertAll(dict["cities"].Substring(1, dict["cities"].Length - 2).Split(','), int.Parse);
+            //tspInstances[k].cities = Array.ConvertAll(dict["cities"].Substring(1, dict["cities"].Length - 2).Split(','), int.Parse);
             tspInstances[k].coordinatesx = Array.ConvertAll(dict["coordinatesx"].Substring(1, dict["coordinatesx"].Length - 2).Split(','), float.Parse);
             tspInstances[k].coordinatesy = Array.ConvertAll(dict["coordinatesy"].Substring(1, dict["coordinatesy"].Length - 2).Split(','), float.Parse);
 
@@ -155,8 +155,7 @@ public class InputOutputManager : MonoBehaviour
     {
         GameManager.WCSPPInstance[] wcsppInstances = new GameManager.WCSPPInstance[numberOfInstances];
 
-        //for (int k = 0; k < numberOfInstances; k++)
-        for (int k = 0; k < 3; k++)
+        for (int k = 0; k < numberOfInstances; k++)
         {
             // create a dictionary where all the variables and definitions are strings
             var dict = new Dictionary<string, string>();
@@ -168,7 +167,14 @@ public class InputOutputManager : MonoBehaviour
             }
 
             // Convert (most of them) to integers, with variables and literals being arrays and the others single literals
-            wcsppInstances[k].cities = Array.ConvertAll(dict["cities"].Substring(1, dict["cities"].Length - 2).Split(','), int.Parse);
+            /*wcsppInstances[k].cities = Array.ConvertAll(dict["cities"].Substring(1, dict["cities"].Length - 2).Split(','), int.Parse);
+
+            foreach (int city in wcsppInstances[k].cities)
+            {
+                wcsppInstances[k].cities[city]++;
+                //Debug.Log(wcsppInstances[k].cities[city]++);
+            }*/
+
             wcsppInstances[k].coordinatesx = Array.ConvertAll(dict["coordinatesx"].Substring(1, dict["coordinatesx"].Length - 2).Split(','), float.Parse);
             wcsppInstances[k].coordinatesy = Array.ConvertAll(dict["coordinatesy"].Substring(1, dict["coordinatesy"].Length - 2).Split(','), float.Parse);
 
@@ -179,8 +185,8 @@ public class InputOutputManager : MonoBehaviour
             wcsppInstances[k].ncities = int.Parse(dict["ncities"]);
             wcsppInstances[k].maxweight = int.Parse(dict["maxweight"]);
 
-            wcsppInstances[k].startcity = int.Parse(dict["startcity"]);
-            wcsppInstances[k].endcity = int.Parse(dict["endcity"]);
+            wcsppInstances[k].startcity = int.Parse(dict["startcity"]) - 1;
+            wcsppInstances[k].endcity = int.Parse(dict["endcity"]) - 1;
 
             wcsppInstances[k].solution = int.Parse(dict["solution"]);
         }

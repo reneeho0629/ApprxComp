@@ -113,7 +113,7 @@ public class GameManager : MonoBehaviour
     public struct TSPInstance
     {
         // Cities and their coordinates
-        public int[] cities;
+        //public int[] cities;
         public float[] coordinatesx;
         public float[] coordinatesy;
 
@@ -130,7 +130,7 @@ public class GameManager : MonoBehaviour
     // A struct that contains the parameters of each WCSPP instance
     public struct WCSPPInstance
     {
-        public int[] cities;
+        //public int[] cities;
         public float[] coordinatesx;
         public float[] coordinatesy;
 
@@ -388,7 +388,7 @@ public class GameManager : MonoBehaviour
 
             // Save participant answer
             performance = (float)Distancetravelled / BoardManager.solution;
-            if (timedOut == 1 || timedOut == 2)
+            if ((timedOut == 1 || timedOut == 2) && !BoardManager.SubmissionValid(true))
             {
                 performance = 0;
             }

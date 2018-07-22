@@ -7,10 +7,8 @@ using System.Linq;
 
 public class PointerEventsController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-
-    public int mouseOnCount = 0;
-    public int fromcity;
-    public int tocity;
+    public static int fromcity;
+    public static int tocity;
 
     public static GameObject tempLine;
     public static GameObject tempDistance;
@@ -18,11 +16,9 @@ public class PointerEventsController : MonoBehaviour, IPointerEnterHandler, IPoi
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        mouseOnCount = mouseOnCount + 1;
-        
         tocity = int.Parse(eventData.pointerCurrentRaycast.gameObject.GetComponent<Text>().text);
-        Debug.Log(eventData.pointerCurrentRaycast.gameObject.GetComponent<Text>().text);
-        if (BoardManager.previouscities.Count() != 0 && BoardManager.weights[BoardManager.previouscities.Last(), tocity] != 0)
+        //Debug.Log(eventData.pointerCurrentRaycast.gameObject.GetComponent<Text>().text);
+        if (BoardManager.previouscities.Count() != 0)
         {
             fromcity = BoardManager.previouscities.Last();
             HighlightLine(fromcity, tocity, 0.04f);
@@ -30,7 +26,7 @@ public class PointerEventsController : MonoBehaviour, IPointerEnterHandler, IPoi
     }
     public void OnPointerExit(PointerEventData eventData)
     {
-        Debug.Log("pointer out");
+        //Debug.Log("pointer out");
         Destroy(tempLine);
         Destroy(tempDistance);
         Destroy(tempWeight);
@@ -63,10 +59,10 @@ public class PointerEventsController : MonoBehaviour, IPointerEnterHandler, IPoi
             tempDistance.transform.SetParent(BoardManager.canvas.GetComponent<Transform>(), false);
             tempDistance.transform.position = ((coordestination + coordeparture) / 2);
             tempDistance.GetComponent<Text>().text = "D:" + dt.ToString();
-            tempDistance.GetComponent<Text>().color = new Color(0f, 0f, 1f);
+            tempDistance.GetComponent<Text>().color = Color.blue;
             tempDistance.GetComponent<Light>().enabled = true;
         }
-        else if (GameManager.problemName == 'w'.ToString())
+        else if (GameManager.problemName == 'w'.ToString() && BoardManager.weights[BoardManager.previouscities.Last(), tocity] != 0)
         {
             // WCSPP Instance
             int wt = BoardManager.weights[cityofdeparture, cityofdestination];
@@ -74,7 +70,7 @@ public class PointerEventsController : MonoBehaviour, IPointerEnterHandler, IPoi
             tempWeight.transform.SetParent(BoardManager.canvas.GetComponent<Transform>(), false);
             tempWeight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.18f, 0);
             tempWeight.GetComponent<Text>().text = "W:" + wt.ToString();
-            tempWeight.GetComponent<Text>().color = new Color(0f, 0f, 1f);
+            tempWeight.GetComponent<Text>().color = Color.blue;
             tempWeight.GetComponent<Light>().enabled = true;
 
             int dt = BoardManager.distances[cityofdeparture, cityofdestination];
@@ -82,7 +78,7 @@ public class PointerEventsController : MonoBehaviour, IPointerEnterHandler, IPoi
             tempDistance.transform.SetParent(BoardManager.canvas.GetComponent<Transform>(), false);
             tempDistance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.18f, 0);
             tempDistance.GetComponent<Text>().text = "D:" + dt.ToString();
-            tempDistance.GetComponent<Text>().color = new Color(0f, 0f, 1f);
+            tempDistance.GetComponent<Text>().color = Color.blue;
             tempDistance.GetComponent<Light>().enabled = true;
         }
 

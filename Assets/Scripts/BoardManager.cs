@@ -24,7 +24,7 @@ public class BoardManager : MonoBehaviour
     // Coordinate vectors for this trial. ONLY INTEGERS allowed.
     public static float[] cox;
     public static float[] coy;
-    public static int[] cities;
+    public static int ncities;
     public static int[,] distances;
     public static int[,] weights;
     public static int solution;
@@ -116,7 +116,7 @@ public class BoardManager : MonoBehaviour
         if (GameManager.problemName == 't'.ToString())
         {
             // TSP instance
-            Debug.Log("Setting up TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
+            Debug.Log("Setting up TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial + " , Current Instance " + (GameManager.tspRandomization[GameManager.TotalTrial - 1]+1));
             
             // current instance
             currInstance = GameManager.tspRandomization[GameManager.TotalTrial - 1];
@@ -125,7 +125,7 @@ public class BoardManager : MonoBehaviour
         else if (GameManager.problemName == 'w'.ToString())
         {
             // WCSPP Instance
-            Debug.Log("Setting up WCSPP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
+            Debug.Log("Setting up WCSPP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial + " , Current Instance " + (GameManager.wcsppRandomization[GameManager.TotalTrial - 1]+1));
             
             // current instance
             currInstance = GameManager.wcsppRandomization[GameManager.TotalTrial - 1];
@@ -134,7 +134,7 @@ public class BoardManager : MonoBehaviour
         else if (GameManager.problemName == 'm'.ToString())
         {
             // Metric TSP Instance
-            Debug.Log("Setting up Euclidean TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial);
+            Debug.Log("Setting up Euclidean TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial + " , Current Instance " + (GameManager.mtspRandomization[GameManager.TotalTrial - 1]+1));
             
             // current instance
             currInstance = GameManager.mtspRandomization[GameManager.TotalTrial - 1];
@@ -153,7 +153,7 @@ public class BoardManager : MonoBehaviour
         coy = currentInstance.coordinatesy;
         unitycoord = BoardFunctions.CoordinateConvertor(cox, coy);
 
-        cities = currentInstance.cities;
+        ncities = currentInstance.ncities;
         distances = currentInstance.distancematrix;
 
         solution = currentInstance.solution;
@@ -189,18 +189,18 @@ public class BoardManager : MonoBehaviour
 
         // Display current distance
         DistanceText = GameObject.Find("DistanceText").GetComponent<Text>();
-        DistanceText.color = Color.green;
+        DistanceText.color = Color.yellow;
 
         // Display current weight
         WeightText = GameObject.Find("WeightText").GetComponent<Text>();
-        WeightText.color = Color.red;
+        WeightText.color = Color.green;
 
         // Coordinate of the cities
         cox = currentInstance.coordinatesx;
         coy = currentInstance.coordinatesy;
         unitycoord = BoardFunctions.CoordinateConvertor(cox, coy);
 
-        cities = currentInstance.cities;
+        ncities = currentInstance.ncities;
         distances = currentInstance.distancematrix;
         weights = currentInstance.weightmatrix;
 
@@ -234,6 +234,7 @@ public class BoardManager : MonoBehaviour
         GameObject instance = Instantiate(CityItemPrefab, itemPosition, Quaternion.identity) as GameObject;
         if (GameManager.problemName == 'w'.ToString() && itemNumber == GameManager.wcsppInstances[currInstance].startcity)
         {
+            //Debug.Log(GameManager.wcsppInstances[currInstance].startcity);
             instance = Instantiate(StartCityPrefab, itemPosition, Quaternion.identity) as GameObject;
         }
         else if (GameManager.problemName == 'w'.ToString() && itemNumber == GameManager.wcsppInstances[currInstance].endcity)
@@ -247,7 +248,7 @@ public class BoardManager : MonoBehaviour
         Item itemInstance;
         itemInstance.gameItem = instance;
         itemInstance.CityButton = itemInstance.gameItem.GetComponent<Button>();
-        itemInstance.CityNumber = cities[itemNumber];
+        itemInstance.CityNumber = itemNumber;
         itemInstance.center = itemPosition;
 
         // Setting the position in a separate line is importatant in order to set it according to global coordinates.
@@ -364,7 +365,7 @@ public class BoardManager : MonoBehaviour
             // If deselecting a city
             EraseLine(itemToLocate);
         }
-        else if (previouscities.Count() == cities.Length && previouscities.First() == itemToLocate.CityNumber)
+        else if (previouscities.Count() == ncities && previouscities.First() == itemToLocate.CityNumber)
         {
             // Allow the last click of the start city to complete the circuit
             DrawLine(itemToLocate);
@@ -655,7 +656,7 @@ public class BoardManager : MonoBehaviour
             distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
             distance.transform.position = ((coordestination + coordeparture) / 2);
             distance.GetComponent<Text>().text = "D:" + dt.ToString();
-            distance.GetComponent<Text>().color = new Color(dt / 1000f, 1f, 0f);
+            distance.GetComponent<Text>().color = Color.yellow;
         }
         else if (GameManager.problemName == 'w'.ToString())
         {
@@ -665,14 +666,14 @@ public class BoardManager : MonoBehaviour
             weight.transform.SetParent(canvas.GetComponent<Transform>(), false);
             weight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.18f, 0);
             weight.GetComponent<Text>().text = "W:" + wt.ToString();
-            weight.GetComponent<Text>().color = new Color(1f, 1f - (wt / 1000f), 0f);
+            weight.GetComponent<Text>().color = Color.green;
 
             int dt = distances[cityofdeparture, cityofdestination];
             GameObject distance = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
             distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
             distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.18f, 0);
             distance.GetComponent<Text>().text = "D:" + dt.ToString();
-            distance.GetComponent<Text>().color = new Color(dt / 1000f, 1f, 0f);
+            distance.GetComponent<Text>().color = Color.yellow;
         }
 
     }
