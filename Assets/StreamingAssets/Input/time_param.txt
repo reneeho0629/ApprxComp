@@ -1,4 +1,4 @@
 timeRest1:0.5
 timeRest2:15
 timeRest3:30
-timeQuestion:10
+timeQuestion:999

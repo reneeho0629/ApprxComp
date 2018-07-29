@@ -113,6 +113,7 @@ public class InputOutputManager : MonoBehaviour
 
             // Add the key-value pair to the dictionary:
             dict.Add(tmp[0], tmp[1]);
+            //Debug.Log(tmp[0] +" "+ tmp[1]);
         }
         sr.Close();
     }
@@ -131,6 +132,7 @@ public class InputOutputManager : MonoBehaviour
             // Use streamreader to read the input files if there are lines to read
             using (StreamReader sr = new StreamReader(folderPathLoadInstances + type + (k + 1) + ".txt"))
             {
+                //Debug.Log(k);
                 ReadToDict(sr, dict);
             }
 
@@ -306,7 +308,16 @@ public class InputOutputManager : MonoBehaviour
             // Get the instance number for this trial (take the block number, subtract 1 because indexing starts at 0. Then multiply it
             // by numberOfTrials (i.e. 10, 10 per block) and add the trial number of this block. Thus, the 2nd trial of block 2 will be
             // instance number 12 overall) and add 1 because the instanceRandomization is linked to array numbering in C#, which starts at 0;
-            int instanceNum = GameManager.tspRandomization[GameManager.TotalTrial - 1] + 1;
+            int instanceNum;
+
+            if (GameManager.problemName == 't'.ToString())
+            {
+                instanceNum = GameManager.tspRandomization[GameManager.TotalTrial - 1] + 1;
+            }
+            else
+            {
+                instanceNum = GameManager.mtspRandomization[GameManager.TotalTrial - 1] + 1;
+            }
 
             // what to save and the order in which to do so
             string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + timeSpent + ";" + itemsSelected + ";"

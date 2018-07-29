@@ -1,4 +1,6 @@
+problemOrder:[t,w,m]
 numberOfTrials:8
 numberOfBlocks:3
-numberOfInstances:24
-instanceRandomization:[17,15,12,9,6,3,23,21,18,14,10,7,4,1,24,20,13,16,11,8,5,2,19,22]
+tspRandomization:[13,19,9,1,21,5,7,12,23,18,16,15,17,6,10,22,3,2,24,20,14,4,8,11]
+wcsppRandomization:[10,7,13,9,24,19,14,16,2,23,11,21,15,5,12,4,18,6,22,3,8,20,1,17]
+mRandomization:[19,16,21,18,10,24,1,14,9,22,15,5,8,17,2,7,3,11,20,13,12,6,23,4]

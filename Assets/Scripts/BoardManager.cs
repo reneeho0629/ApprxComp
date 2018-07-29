@@ -108,7 +108,7 @@ public class BoardManager : MonoBehaviour
         LineItemPrefab = (GameObject)Resources.Load("LineItem");
         TextPrefab = (GameObject)Resources.Load("TextItem");
         BigTextPrefab = (GameObject)Resources.Load("BigTextItem");
-        
+
         // Display reset button
         Reset = GameObject.Find("Reset").GetComponent<Button>();
         Reset.onClick.AddListener(ResetClicked);
@@ -116,8 +116,8 @@ public class BoardManager : MonoBehaviour
         if (GameManager.problemName == 't'.ToString())
         {
             // TSP instance
-            Debug.Log("Setting up TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial + " , Current Instance " + (GameManager.tspRandomization[GameManager.TotalTrial - 1]+1));
-            
+            Debug.Log("Setting up Random TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial + " , Current Instance " + (GameManager.tspRandomization[GameManager.TotalTrial - 1] + 1));
+
             // current instance
             currInstance = GameManager.tspRandomization[GameManager.TotalTrial - 1];
             SetTSP(GameManager.tspInstances[currInstance]);
@@ -125,8 +125,8 @@ public class BoardManager : MonoBehaviour
         else if (GameManager.problemName == 'w'.ToString())
         {
             // WCSPP Instance
-            Debug.Log("Setting up WCSPP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial + " , Current Instance " + (GameManager.wcsppRandomization[GameManager.TotalTrial - 1]+1));
-            
+            Debug.Log("Setting up WCSPP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial + " , Current Instance " + (GameManager.wcsppRandomization[GameManager.TotalTrial - 1] + 1));
+
             // current instance
             currInstance = GameManager.wcsppRandomization[GameManager.TotalTrial - 1];
             SetWCSPP(GameManager.wcsppInstances[currInstance]);
@@ -134,8 +134,8 @@ public class BoardManager : MonoBehaviour
         else if (GameManager.problemName == 'm'.ToString())
         {
             // Metric TSP Instance
-            Debug.Log("Setting up Euclidean TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial + " , Current Instance " + (GameManager.mtspRandomization[GameManager.TotalTrial - 1]+1));
-            
+            Debug.Log("Setting up Euclidean TSP Instance: Block " + (GameManager.block + 1) + "/" + GameManager.numberOfBlocks + ", Trial " + GameManager.trial + "/" + GameManager.numberOfTrials + " , Total Trial " + GameManager.TotalTrial + " , Current Instance " + (GameManager.mtspRandomization[GameManager.TotalTrial - 1] + 1));
+
             // current instance
             currInstance = GameManager.mtspRandomization[GameManager.TotalTrial - 1];
             SetTSP(GameManager.mtspInstances[currInstance]);
@@ -264,7 +264,7 @@ public class BoardManager : MonoBehaviour
     {
         if (GameManager.escena == "Trial")
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow) && SubmissionValid(false))
+            if (Input.GetKeyDown(KeyCode.UpArrow)) //&& SubmissionValid(false))
             {
                 InputOutputManager.SaveTimeStamp("ParticipantSkip");
                 GameManager.ChangeToNextScene(itemClicks, true);
@@ -336,7 +336,7 @@ public class BoardManager : MonoBehaviour
                 Destroy(notAll, 2);
             }
         }
-        
+
         return false;
     }
 
@@ -591,7 +591,15 @@ public class BoardManager : MonoBehaviour
     void SetDistanceText()
     {
         CalcDistance();
-        DistanceText.text = "Distance so far: " + GameManager.Distancetravelled.ToString() + "km";
+
+        if (GameManager.problemName == 'w'.ToString() || GameManager.problemName == 'm'.ToString())
+        {
+            DistanceText.text = "Distance so far: " + GameManager.Distancetravelled.ToString() + "km";
+        }
+        else
+        {
+            DistanceText.text = "Time so far: " + GameManager.Distancetravelled.ToString() + "Hr";
+        }
 
         if (GameManager.problemName == 'w'.ToString())
         {
@@ -655,8 +663,23 @@ public class BoardManager : MonoBehaviour
             GameObject distance = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
             distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
             distance.transform.position = ((coordestination + coordeparture) / 2);
-            distance.GetComponent<Text>().text = "D:" + dt.ToString();
-            distance.GetComponent<Text>().color = Color.yellow;
+            if (GameManager.problemName == 't'.ToString())
+            {
+                distance.GetComponent<Text>().text = "T:" + dt.ToString();
+            }
+            else
+            {
+                distance.GetComponent<Text>().text = "D:" + dt.ToString();
+            }
+
+            if (dt > 500)
+            {
+                distance.GetComponent<Text>().color = new Color(1f, 1f - (dt-500) / 500f, 0f);
+            }
+            else
+            {
+                distance.GetComponent<Text>().color = new Color((dt - 100) / 400f, 1f, 0f);
+            }
         }
         else if (GameManager.problemName == 'w'.ToString())
         {
@@ -664,14 +687,14 @@ public class BoardManager : MonoBehaviour
             int wt = weights[cityofdeparture, cityofdestination];
             GameObject weight = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
             weight.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            weight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.18f, 0);
+            weight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.20f, 0);
             weight.GetComponent<Text>().text = "W:" + wt.ToString();
             weight.GetComponent<Text>().color = Color.green;
 
             int dt = distances[cityofdeparture, cityofdestination];
             GameObject distance = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
             distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.18f, 0);
+            distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.20f, 0);
             distance.GetComponent<Text>().text = "D:" + dt.ToString();
             distance.GetComponent<Text>().color = Color.yellow;
         }

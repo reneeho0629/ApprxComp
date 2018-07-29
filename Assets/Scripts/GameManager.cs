@@ -149,7 +149,7 @@ public class GameManager : MonoBehaviour
 
     // Keep track of total payment
     // Default value is the show up fee
-    public static float payAmount = 5f;
+    public static double payAmount = 5.00;
 
     // Use this for initialization
     void Start()
@@ -242,7 +242,7 @@ public class GameManager : MonoBehaviour
             Text nombre = GameObject.Find("ProblemName").GetComponent<Text>();
             if (problemName == 't'.ToString())
             {
-                nombre.text = "Next Problem: TSP";
+                nombre.text = "Next Problem: Random TSP";
             }
             else if (problemName == 'w'.ToString())
             {
@@ -306,7 +306,8 @@ public class GameManager : MonoBehaviour
 
         for (int i = problemNumber * numberOfInstances; i < numberOfInstances + problemNumber * numberOfInstances; i++)
         {
-            payAmount += perf[i];
+            // Payment calculation
+            payAmount += 1.00 * Math.Pow(Double.Parse(perf[i].ToString()), 3.00);
             perfText += " " + perf[i] + ";";
         }
         return perfText;
@@ -387,11 +388,18 @@ public class GameManager : MonoBehaviour
             }
 
             // Save participant answer
-            performance = (float)Distancetravelled / BoardManager.solution;
+            // Calc Perf
+            if ((float)Distancetravelled > 0)
+            {
+                performance = BoardManager.solution / (float)Distancetravelled;
+            }
+            
+
             if ((timedOut == 1 || timedOut == 2) && !BoardManager.SubmissionValid(true))
             {
                 performance = 0;
             }
+
             perf.Add(performance);
 
             InputOutputManager.SaveTrialInfo(ExtractItemsSelected(itemClicks), timeTaken);

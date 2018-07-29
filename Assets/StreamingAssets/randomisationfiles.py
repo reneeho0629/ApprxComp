@@ -6,7 +6,7 @@ print(x)
 y = ["t", "w", "m"]
 print(y)
 
-for j in range(1, 3):
+for j in range(1, 25):
     f = open("%r_param2.txt" % j,"w+")
 
     shuffle(y)
