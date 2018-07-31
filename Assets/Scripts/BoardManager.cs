@@ -140,6 +140,8 @@ public class BoardManager : MonoBehaviour
             currInstance = GameManager.mtspRandomization[GameManager.TotalTrial - 1];
             SetTSP(GameManager.mtspInstances[currInstance]);
         }
+
+        SetDistanceText();
     }
 
     // Funciton to set up regular & Metric TSP instance
@@ -152,20 +154,18 @@ public class BoardManager : MonoBehaviour
         cox = currentInstance.coordinatesx;
         coy = currentInstance.coordinatesy;
         unitycoord = BoardFunctions.CoordinateConvertor(cox, coy);
-
+        
+        // Number of objects
         ncities = currentInstance.ncities;
         distances = currentInstance.distancematrix;
 
         solution = currentInstance.solution;
 
-        // Number of objects
-        int objectCount = currentInstance.ncities;
-
         // Store objects in a list
-        items = new Item[objectCount];
-        for (int i = 0; i < objectCount; i++)
+        items = new Item[ncities];
+        for (int i = 0; i < ncities; i++)
         {
-            for (int j = i; j < objectCount; j++)
+            for (int j = i; j < ncities; j++)
             {
                 if (distances[i, j] != 0)
                 {
@@ -174,7 +174,7 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < objectCount; i++)
+        for (int i = 0; i < ncities; i++)
         {
             items[i] = GenerateItem(i, unitycoord[i]);
         }
@@ -200,20 +200,18 @@ public class BoardManager : MonoBehaviour
         coy = currentInstance.coordinatesy;
         unitycoord = BoardFunctions.CoordinateConvertor(cox, coy);
 
+        // Number of objects
         ncities = currentInstance.ncities;
         distances = currentInstance.distancematrix;
         weights = currentInstance.weightmatrix;
 
         solution = currentInstance.solution;
-
-        // Number of objects
-        int objectCount = currentInstance.ncities;
-
+        
         // Store objects in a list
-        items = new Item[objectCount];
-        for (int i = 0; i < objectCount; i++)
+        items = new Item[ncities];
+        for (int i = 0; i < ncities; i++)
         {
-            for (int j = i; j < objectCount; j++)
+            for (int j = i; j < ncities; j++)
             {
                 if (distances[i, j] != 0)
                 {
@@ -222,7 +220,7 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < objectCount; i++)
+        for (int i = 0; i < ncities; i++)
         {
             items[i] = GenerateItem(i, unitycoord[i]);
         }
@@ -666,19 +664,26 @@ public class BoardManager : MonoBehaviour
             if (GameManager.problemName == 't'.ToString())
             {
                 distance.GetComponent<Text>().text = "T:" + dt.ToString();
+                if (dt > 500)
+                {
+                    distance.GetComponent<Text>().color = new Color(1f, 1f - (dt - 500) / 500f, 0f);
+                }
+                else
+                {
+                    distance.GetComponent<Text>().color = new Color((dt - 100) / 400f, 1f, 0f);
+                }
             }
             else
             {
                 distance.GetComponent<Text>().text = "D:" + dt.ToString();
-            }
-
-            if (dt > 500)
-            {
-                distance.GetComponent<Text>().color = new Color(1f, 1f - (dt-500) / 500f, 0f);
-            }
-            else
-            {
-                distance.GetComponent<Text>().color = new Color((dt - 100) / 400f, 1f, 0f);
+                if (dt > 500)
+                {
+                    distance.GetComponent<Text>().color = new Color(1f, 1f - (dt - 500) / 500f, 0f);
+                }
+                else
+                {
+                    distance.GetComponent<Text>().color = new Color((dt - 100) / 400f, 1f, 0f);
+                }
             }
         }
         else if (GameManager.problemName == 'w'.ToString())

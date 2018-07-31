@@ -90,8 +90,14 @@ public class GameManager : MonoBehaviour
     // A list of floats to record participant performance
     // Performance should always be equal to or greater than 1.
     // Due to the way it's calculated (participant answer/optimal solution), performance closer to 1 is better.
-    public static List<float> perf = new List<float>();
-    public static float performance;
+    public static List<double> perf = new List<double>();
+    public static double performance;
+    public static List<double> paylist = new List<double>();
+    public static double pay;
+
+    // Keep track of total payment
+    // Default value is the show up fee
+    public static double payAmount = 8.00;
 
     // The order of the Problems to be presented
     public static List<string> problemOrder;
@@ -146,11 +152,7 @@ public class GameManager : MonoBehaviour
 
         public int solution;
     }
-
-    // Keep track of total payment
-    // Default value is the show up fee
-    public static double payAmount = 5.00;
-
+    
     // Use this for initialization
     void Start()
     {
@@ -277,7 +279,7 @@ public class GameManager : MonoBehaviour
             three.text = DisplayPerf(2);
 
             Text pay = GameObject.Find("PayText").GetComponent<Text>();
-            pay.text = "Total Payment: $" + payAmount.ToString();
+            pay.text = "Total Payment: $" + Math.Ceiling(payAmount).ToString();
         }
     }
 
@@ -307,8 +309,7 @@ public class GameManager : MonoBehaviour
         for (int i = problemNumber * numberOfInstances; i < numberOfInstances + problemNumber * numberOfInstances; i++)
         {
             // Payment calculation
-            payAmount += 1.00 * Math.Pow(Double.Parse(perf[i].ToString()), 3.00);
-            perfText += " " + perf[i] + ";";
+            perfText += " $" + paylist[i] + ";";
         }
         return perfText;
     }
@@ -393,6 +394,10 @@ public class GameManager : MonoBehaviour
             {
                 performance = BoardManager.solution / (float)Distancetravelled;
             }
+            else
+            {
+                performance = 0;
+            }
             
 
             if ((timedOut == 1 || timedOut == 2) && !BoardManager.SubmissionValid(true))
@@ -401,6 +406,24 @@ public class GameManager : MonoBehaviour
             }
 
             perf.Add(performance);
+
+            if (problemName == 'w'.ToString())
+            {
+                pay = Math.Pow(performance, 2.00);
+            }
+            else if (problemName == 't'.ToString())
+            {
+                pay = Math.Pow(performance, 1.30);
+            }
+            else if (problemName == 'm'.ToString())
+            {
+                pay = Math.Pow(performance, 40.00);
+            }
+
+            paylist.Add(pay);
+
+            payAmount += pay;
+            Debug.Log("current pay: $" + payAmount);
 
             InputOutputManager.SaveTrialInfo(ExtractItemsSelected(itemClicks), timeTaken);
             InputOutputManager.SaveTimeStamp("ParticipantAnswer");
@@ -463,7 +486,7 @@ public class GameManager : MonoBehaviour
             {
                 itemsIn.Remove(Convert.ToInt32(click.CityNumber));
             }
-            else if (click.State == 3)
+            else if (click.State == 2)
             {
                 itemsIn.Clear();
             }

@@ -216,7 +216,7 @@ public class InputOutputManager : MonoBehaviour
             string[] lines = new string[3];
             lines[0] = "PartcipantID:" + participantID;
             lines[1] = "RandID:" + randomisationID;
-            lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber;performance;timedOut(Yes,neverValid(1)/Yes,previouslyValid(2)/No(0))";
+            lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber;performance;pay;timedOut(Yes,neverValid(1)/Yes,previouslyValid(2)/No(0))";
             using (StreamWriter outputFile = new StreamWriter(folderPathSave + ID + "TrialInfo.txt", true))
             {
                 WriteToFile(outputFile, lines);
@@ -253,7 +253,7 @@ public class InputOutputManager : MonoBehaviour
         string[] lines = new string[3];
         lines[0] = "PartcipantID:" + participantID;
         lines[1] = "RandID:" + randomisationID;
-        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;finalweight;instanceNumber;performance;timedOut(Yes,neverValid(1)/Yes,previouslyValid(2)/No(0))";
+        lines[2] = "block;trial;timeSpent;itemsSelected;finaldistance;finalweight;instanceNumber;performance;pay;timedOut(Yes,neverValid(1)/Yes,previouslyValid(2)/No(0))";
         using (StreamWriter outputFile = new StreamWriter(folderPathSave + wcsppIdentifier + "TrialInfo.txt", true))
         {
             WriteToFile(outputFile, lines);
@@ -295,7 +295,7 @@ public class InputOutputManager : MonoBehaviour
 
             // what to save and the order in which to do so
             string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + timeSpent + ";" + itemsSelected + ";"
-                + GameManager.Distancetravelled + ";" + GameManager.weightValue + ";" + instanceNum + ";" + GameManager.performance + ";" + GameManager.timedOut;
+                + GameManager.Distancetravelled + ";" + GameManager.weightValue + ";" + instanceNum + ";" + GameManager.performance + ";" + GameManager.pay + ";" + GameManager.timedOut;
 
             // Where to save
             using (StreamWriter outputFile = new StreamWriter(folderPathSave + GetID() + "TrialInfo.txt", true))
@@ -321,7 +321,7 @@ public class InputOutputManager : MonoBehaviour
 
             // what to save and the order in which to do so
             string dataTrialText = GameManager.block + ";" + GameManager.trial + ";" + timeSpent + ";" + itemsSelected + ";"
-                + GameManager.Distancetravelled + ";" + instanceNum + ";" + GameManager.performance + ";" + GameManager.timedOut;
+                + GameManager.Distancetravelled + ";" + instanceNum + ";" + GameManager.performance + ";" + GameManager.pay + ";" + GameManager.timedOut;
 
             // Where to save
             using (StreamWriter outputFile = new StreamWriter(folderPathSave + GetID() + "TrialInfo.txt", true))
