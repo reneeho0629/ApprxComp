@@ -244,7 +244,7 @@ public class GameManager : MonoBehaviour
             Text nombre = GameObject.Find("ProblemName").GetComponent<Text>();
             if (problemName == 't'.ToString())
             {
-                nombre.text = "Next Problem: Random TSP";
+                nombre.text = "Next Problem: TSP 2";
             }
             else if (problemName == 'w'.ToString())
             {
@@ -252,7 +252,7 @@ public class GameManager : MonoBehaviour
             }
             else if (problemName == 'm'.ToString())
             {
-                nombre.text = "Next Problem: Metric TSP";
+                nombre.text = "Next Problem: TSP 1";
             }
 
             skipButton = GameObject.Find("Skip").GetComponent<Button>();
@@ -293,7 +293,7 @@ public class GameManager : MonoBehaviour
         if (probName == 't'.ToString())
         {
             // TSP instance
-            perfText += "TSP:";
+            perfText += "rTSP:";
         }
         else if (probName == 'w'.ToString())
         {
@@ -409,15 +409,15 @@ public class GameManager : MonoBehaviour
 
             if (problemName == 'w'.ToString())
             {
-                pay = Math.Pow(performance, 2.00);
+                pay = Math.Pow(performance, 1.70);
             }
             else if (problemName == 't'.ToString())
             {
-                pay = Math.Pow(performance, 1.30);
+                pay = Math.Pow(performance, 1.00);
             }
             else if (problemName == 'm'.ToString())
             {
-                pay = Math.Pow(performance, 40.00);
+                pay = Math.Pow(performance, 1.70);
             }
 
             paylist.Add(pay);

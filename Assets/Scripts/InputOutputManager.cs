@@ -112,7 +112,10 @@ public class InputOutputManager : MonoBehaviour
             string[] tmp = line.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
 
             // Add the key-value pair to the dictionary:
-            dict.Add(tmp[0], tmp[1]);
+            if (!dict.ContainsKey(tmp[0]))
+            {
+                dict.Add(tmp[0], tmp[1]);
+            }
             //Debug.Log(tmp[0] +" "+ tmp[1]);
         }
         sr.Close();

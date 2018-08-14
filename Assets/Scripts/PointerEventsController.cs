@@ -45,16 +45,17 @@ public class PointerEventsController : MonoBehaviour, IPointerEnterHandler, IPoi
         coordinates[0] = coordestination;
         coordinates[1] = coordeparture;
 
-        tempLine = Instantiate(BoardManager.LineItemPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
-        BoardManager.canvas = GameObject.Find("Canvas");
-        tempLine.transform.SetParent(BoardManager.canvas.GetComponent<Transform>(), false);
-        tempLine.GetComponent<LineRenderer>().startWidth = linewidth;
-        tempLine.GetComponent<LineRenderer>().endWidth = linewidth;
-        tempLine.GetComponent<LineRenderer>().material.color = Color.green;
-        tempLine.GetComponent<LineRenderer>().sortingOrder = 0;
-        tempLine.GetComponent<LineRenderer>().SetPositions(coordinates);
         if (BoardManager.distances[BoardManager.previouscities.Last(), tocity] != 0)
         {
+            tempLine = Instantiate(BoardManager.LineItemPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
+            BoardManager.canvas = GameObject.Find("Canvas");
+            tempLine.transform.SetParent(BoardManager.canvas.GetComponent<Transform>(), false);
+            tempLine.GetComponent<LineRenderer>().startWidth = linewidth;
+            tempLine.GetComponent<LineRenderer>().endWidth = linewidth;
+            tempLine.GetComponent<LineRenderer>().material.color = Color.green;
+            tempLine.GetComponent<LineRenderer>().sortingOrder = 0;
+            tempLine.GetComponent<LineRenderer>().SetPositions(coordinates);
+        
             if (GameManager.problemName == 't'.ToString() || GameManager.problemName == 'm'.ToString())
             {
                 // TSP instance
@@ -69,7 +70,7 @@ public class PointerEventsController : MonoBehaviour, IPointerEnterHandler, IPoi
                 }
                 else
                 {
-                    tempDistance.GetComponent<Text>().text = "D:" + dt.ToString();
+                    tempDistance.GetComponent<Text>().text = "T:" + dt.ToString();
                 }
 
                 tempDistance.GetComponent<Text>().color = Color.blue;
@@ -81,15 +82,15 @@ public class PointerEventsController : MonoBehaviour, IPointerEnterHandler, IPoi
                 int wt = BoardManager.weights[cityofdeparture, cityofdestination];
                 tempWeight = Instantiate(BoardManager.TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
                 tempWeight.transform.SetParent(BoardManager.canvas.GetComponent<Transform>(), false);
-                tempWeight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.20f, 0);
-                tempWeight.GetComponent<Text>().text = "W:" + wt.ToString();
+                tempWeight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.23f, 0.0f);
+                tempWeight.GetComponent<Text>().text = "$" + wt.ToString();
                 tempWeight.GetComponent<Text>().color = Color.blue;
                 tempWeight.GetComponent<Light>().enabled = true;
 
                 int dt = BoardManager.distances[cityofdeparture, cityofdestination];
                 tempDistance = Instantiate(BoardManager.TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
                 tempDistance.transform.SetParent(BoardManager.canvas.GetComponent<Transform>(), false);
-                tempDistance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.20f, 0);
+                tempDistance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.23f, 0.0f);
                 tempDistance.GetComponent<Text>().text = "D:" + dt.ToString();
                 tempDistance.GetComponent<Text>().color = Color.blue;
                 tempDistance.GetComponent<Light>().enabled = true;

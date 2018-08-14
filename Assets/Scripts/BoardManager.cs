@@ -91,6 +91,7 @@ public class BoardManager : MonoBehaviour
         GameManager.Distancetravelled = 0;
         GameManager.weightValue = 0;
         GameManager.timedOut = 1;
+        citiesvisited = 0;
         SetInstance();
 
         keysON = true;
@@ -185,7 +186,7 @@ public class BoardManager : MonoBehaviour
     {
         // Display Max distance
         Text quest = GameObject.Find("Question").GetComponent<Text>();
-        quest.text = "Max weight: " + GameManager.wcsppInstances[currInstance].maxweight + "kg";
+        quest.text = "Max cost: $" + GameManager.wcsppInstances[currInstance].maxweight;
 
         // Display current distance
         DistanceText = GameObject.Find("DistanceText").GetComponent<Text>();
@@ -262,7 +263,7 @@ public class BoardManager : MonoBehaviour
     {
         if (GameManager.escena == "Trial")
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow)) //&& SubmissionValid(false))
+            if (Input.GetKeyDown(KeyCode.UpArrow) && SubmissionValid(false))
             {
                 InputOutputManager.SaveTimeStamp("ParticipantSkip");
                 GameManager.ChangeToNextScene(itemClicks, true);
@@ -460,7 +461,7 @@ public class BoardManager : MonoBehaviour
                 AddInvalid(itemToLocate, 8);
                 GameObject heavyText = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
                 heavyText.transform.SetParent(canvas.GetComponent<Transform>(), false);
-                heavyText.GetComponent<Text>().text = "Weight Limit Exceeded";
+                heavyText.GetComponent<Text>().text = "This path is too expensive";
                 Destroy(heavyText, 2);
                 return false;
             }
@@ -472,7 +473,7 @@ public class BoardManager : MonoBehaviour
             AddInvalid(itemToLocate, 9);
             GameObject noPath = Instantiate(BigTextPrefab, new Vector2(0, -480), Quaternion.identity) as GameObject;
             noPath.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            noPath.GetComponent<Text>().text = "Invalid path, the two cities cannot be connected directly";
+            noPath.GetComponent<Text>().text = "Invalid path, these two cities cannot be connected directly";
             Destroy(noPath, 2);
             return false;
         }
@@ -592,17 +593,17 @@ public class BoardManager : MonoBehaviour
 
         if (GameManager.problemName == 'w'.ToString() || GameManager.problemName == 'm'.ToString())
         {
-            DistanceText.text = "Distance so far: " + GameManager.Distancetravelled.ToString() + "km";
+            DistanceText.text = "Time so far: " + GameManager.Distancetravelled.ToString() + " Minutes";
         }
         else
         {
-            DistanceText.text = "Time so far: " + GameManager.Distancetravelled.ToString() + "Hr";
+            DistanceText.text = "Time so far: " + GameManager.Distancetravelled.ToString() + " Minutes";
         }
 
         if (GameManager.problemName == 'w'.ToString())
         {
             CalcWeight();
-            WeightText.text = "Weight so far: " + GameManager.weightValue.ToString() + "kg";
+            WeightText.text = "Cost so far: $" + GameManager.weightValue.ToString();
         }
     }
 
@@ -675,7 +676,7 @@ public class BoardManager : MonoBehaviour
             }
             else
             {
-                distance.GetComponent<Text>().text = "D:" + dt.ToString();
+                distance.GetComponent<Text>().text = "T:" + dt.ToString();
                 if (dt > 500)
                 {
                     distance.GetComponent<Text>().color = new Color(1f, 1f - (dt - 500) / 500f, 0f);
@@ -688,19 +689,35 @@ public class BoardManager : MonoBehaviour
         }
         else if (GameManager.problemName == 'w'.ToString())
         {
+            /*
             // WCSPP Instance
             int wt = weights[cityofdeparture, cityofdestination];
             GameObject weight = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
             weight.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            weight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.20f, 0);
-            weight.GetComponent<Text>().text = "W:" + wt.ToString();
+            weight.transform.position = ((coordestination + coordeparture) / 2);
+            weight.GetComponent<Text>().text = "$" + wt.ToString();
+            if (wt > 50)
+            {
+                weight.GetComponent<Text>().color = new Color(1f, 1f - (wt - 50) / 50f, 0f);
+            }
+            else
+            {
+                weight.GetComponent<Text>().color = new Color((wt - 10) / 40f, 1f, 0f);
+            }*/
+            
+            // WCSPP Instance
+            int wt = weights[cityofdeparture, cityofdestination];
+            GameObject weight = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
+            weight.transform.SetParent(canvas.GetComponent<Transform>(), false);
+            weight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.23f, 0);
+            weight.GetComponent<Text>().text = "$" + wt.ToString();
             weight.GetComponent<Text>().color = Color.green;
 
             int dt = distances[cityofdeparture, cityofdestination];
             GameObject distance = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
             distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.20f, 0);
-            distance.GetComponent<Text>().text = "D:" + dt.ToString();
+            distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.23f, 0);
+            distance.GetComponent<Text>().text = "T:" + dt.ToString();
             distance.GetComponent<Text>().color = Color.yellow;
         }
 
