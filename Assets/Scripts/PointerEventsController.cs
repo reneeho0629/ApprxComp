@@ -24,7 +24,7 @@ public class PointerEventsController : MonoBehaviour, IPointerEnterHandler, IPoi
         if (BoardManager.previouscities.Count() != 0)
         {
             fromcity = BoardManager.previouscities.Last();
-            HighlightLine(fromcity, tocity, 0.04f);
+            HighlightLine(fromcity, tocity, 0.03f);
         }
     }
     public void OnPointerExit(PointerEventData eventData)
@@ -91,7 +91,7 @@ public class PointerEventsController : MonoBehaviour, IPointerEnterHandler, IPoi
                 tempDistance = Instantiate(BoardManager.TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
                 tempDistance.transform.SetParent(BoardManager.canvas.GetComponent<Transform>(), false);
                 tempDistance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.23f, 0.0f);
-                tempDistance.GetComponent<Text>().text = "D:" + dt.ToString();
+                tempDistance.GetComponent<Text>().text = "T:" + dt.ToString();
                 tempDistance.GetComponent<Text>().color = Color.blue;
                 tempDistance.GetComponent<Light>().enabled = true;
             }

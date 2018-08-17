@@ -630,6 +630,8 @@ public class BoardManager : MonoBehaviour
 
         canvas = GameObject.Find("Canvas");
         instance.transform.SetParent(canvas.GetComponent<Transform>(), false);
+        instance.GetComponent<LineRenderer>().startWidth = 0.06f;
+        instance.GetComponent<LineRenderer>().endWidth = 0.06f;
         instance.GetComponent<LineRenderer>().sortingOrder = 1;
         lines[citiesvisited] = instance;
         newLine[citiesvisited] = lines[citiesvisited].GetComponent<LineRenderer>();
