@@ -250,6 +250,7 @@ public class BoardManager : MonoBehaviour
         itemInstance.CityNumber = itemNumber;
         itemInstance.center = itemPosition;
 
+        //itemInstance.CityButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("CityVisited");
         // Setting the position in a separate line is importatant in order to set it according to global coordinates.
         BoardFunctions.PlaceItem(itemInstance, itemPosition);
 
@@ -546,6 +547,11 @@ public class BoardManager : MonoBehaviour
     // Add current city to previous cities
     void AddCity(Item itemToLocate)
     {
+        if (GameManager.problemName != 'w'.ToString() || (itemToLocate.CityNumber != GameManager.wcsppInstances[currInstance].startcity && itemToLocate.CityNumber != GameManager.wcsppInstances[currInstance].endcity))
+        {
+            itemToLocate.CityButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("CityVisited");
+        }
+        
         previouscities.Add(itemToLocate.CityNumber);
         citiesvisited = previouscities.Count();
 
@@ -666,7 +672,7 @@ public class BoardManager : MonoBehaviour
             distance.transform.position = ((coordestination + coordeparture) / 2);
             if (GameManager.problemName == 't'.ToString())
             {
-                distance.GetComponent<Text>().text = "T:" + dt.ToString();
+                distance.GetComponent<Text>().text = dt.ToString();
                 if (dt > 500)
                 {
                     distance.GetComponent<Text>().color = new Color(1f, 1f - (dt - 500) / 500f, 0f);
@@ -678,7 +684,7 @@ public class BoardManager : MonoBehaviour
             }
             else
             {
-                distance.GetComponent<Text>().text = "T:" + dt.ToString();
+                distance.GetComponent<Text>().text = dt.ToString();
                 if (dt > 500)
                 {
                     distance.GetComponent<Text>().color = new Color(1f, 1f - (dt - 500) / 500f, 0f);
@@ -691,22 +697,6 @@ public class BoardManager : MonoBehaviour
         }
         else if (GameManager.problemName == 'w'.ToString())
         {
-            /*
-            // WCSPP Instance
-            int wt = weights[cityofdeparture, cityofdestination];
-            GameObject weight = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
-            weight.transform.SetParent(canvas.GetComponent<Transform>(), false);
-            weight.transform.position = ((coordestination + coordeparture) / 2);
-            weight.GetComponent<Text>().text = "$" + wt.ToString();
-            if (wt > 50)
-            {
-                weight.GetComponent<Text>().color = new Color(1f, 1f - (wt - 50) / 50f, 0f);
-            }
-            else
-            {
-                weight.GetComponent<Text>().color = new Color((wt - 10) / 40f, 1f, 0f);
-            }*/
-            
             // WCSPP Instance
             int wt = weights[cityofdeparture, cityofdestination];
             GameObject weight = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
@@ -714,13 +704,34 @@ public class BoardManager : MonoBehaviour
             weight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.23f, 0);
             weight.GetComponent<Text>().text = "$" + wt.ToString();
             weight.GetComponent<Text>().color = Color.green;
-
+            /*
+            if (Physics2D.OverlapArea(weight.transform.position + new Vector3(1f, 0.5f), weight.transform.position + new Vector3(-1f, -0.5f), 4))
+            {
+                weight.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(100.23f, 0);
+            }
+            */
             int dt = distances[cityofdeparture, cityofdestination];
             GameObject distance = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
             distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
             distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.23f, 0);
             distance.GetComponent<Text>().text = "T:" + dt.ToString();
-            distance.GetComponent<Text>().color = Color.yellow;
+            if (dt > 500)
+            {
+                distance.GetComponent<Text>().color = new Color(1f, 1f - (dt - 500) / 500f, 0f);
+            }
+            else
+            {
+                distance.GetComponent<Text>().color = new Color((dt - 100) / 400f, 1f, 0f);
+            }
+
+            /*
+            if (Physics2D.OverlapArea(distance.transform.position, distance.transform.position))
+            {
+                Debug.Log("Text Moved");
+                distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(1.23f, 0);
+            }*/
+
+            //distance.GetComponent<Text>().color = Color.yellow;
         }
 
     }
@@ -728,6 +739,11 @@ public class BoardManager : MonoBehaviour
     // If double click on the previous city then change the destination city back to vacant, and delete the connecting line between the two cities
     void EraseLine(Item itemToLocate)
     {
+        if (GameManager.problemName != 'w'.ToString() || (itemToLocate.CityNumber != GameManager.wcsppInstances[currInstance].startcity && itemToLocate.CityNumber != GameManager.wcsppInstances[currInstance].endcity))
+        {
+            itemToLocate.CityButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("CityVacant");
+        }
+
         if (previouscities.Count == 1 && GameManager.problemName != 'w'.ToString())
         {
             itemToLocate.gameItem.GetComponent<Light>().enabled = false;
@@ -770,6 +786,13 @@ public class BoardManager : MonoBehaviour
                 Destroy(lines[i]);
             }
 
+            for (int j = 0; j < ncities; j++)
+            {
+                if (GameManager.problemName != 'w'.ToString() || (j != GameManager.wcsppInstances[currInstance].startcity && j != GameManager.wcsppInstances[currInstance].endcity))
+                {
+                    items[j].CityButton.GetComponent<Image>().sprite = Resources.Load<Sprite>("CityVacant");
+                }
+            }
             Lightoff();
             previouscities.Clear();
             SetDistanceText();
