@@ -407,7 +407,7 @@ public class GameManager : MonoBehaviour
 
             if (problemName == 'w'.ToString())
             {
-                pay = Math.Pow(performance, 8.00);
+                pay = Math.Pow(performance, 4.50);
             }
             else if (problemName == 't'.ToString())
             {
@@ -415,7 +415,7 @@ public class GameManager : MonoBehaviour
             }
             else if (problemName == 'm'.ToString())
             {
-                pay = Math.Pow(performance, 4.50);
+                pay = Math.Pow(performance, 3.00);
             }
 
             paylist.Add(pay);
