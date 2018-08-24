@@ -407,15 +407,15 @@ public class GameManager : MonoBehaviour
 
             if (problemName == 'w'.ToString())
             {
-                pay = Math.Pow(performance, 1.70);
+                pay = Math.Pow(performance, 8.00);
             }
             else if (problemName == 't'.ToString())
             {
-                pay = Math.Pow(performance, 1.00);
+                pay = Math.Pow(performance, 1.50);
             }
             else if (problemName == 'm'.ToString())
             {
-                pay = Math.Pow(performance, 1.70);
+                pay = Math.Pow(performance, 4.50);
             }
 
             paylist.Add(pay);
