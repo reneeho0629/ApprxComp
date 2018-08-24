@@ -52,7 +52,7 @@ public class PointerEventsController : MonoBehaviour, IPointerEnterHandler, IPoi
             templines[cityofdestination].transform.SetParent(BoardManager.canvas.GetComponent<Transform>(), false);
             templines[cityofdestination].GetComponent<LineRenderer>().startWidth = linewidth;
             templines[cityofdestination].GetComponent<LineRenderer>().endWidth = linewidth;
-            templines[cityofdestination].GetComponent<LineRenderer>().material.color = Color.green;
+            templines[cityofdestination].GetComponent<LineRenderer>().material.color = Color.cyan;
             templines[cityofdestination].GetComponent<LineRenderer>().sortingOrder = 2;
             templines[cityofdestination].GetComponent<LineRenderer>().SetPositions(coordinates);
 

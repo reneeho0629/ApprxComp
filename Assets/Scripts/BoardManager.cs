@@ -194,7 +194,7 @@ public class BoardManager : MonoBehaviour
 
         // Display current weight
         WeightText = GameObject.Find("WeightText").GetComponent<Text>();
-        WeightText.color = Color.green;
+        WeightText.color = Color.cyan;
 
         // Coordinate of the cities
         cox = currentInstance.coordinatesx;
@@ -233,7 +233,6 @@ public class BoardManager : MonoBehaviour
         GameObject instance = Instantiate(CityItemPrefab, itemPosition, Quaternion.identity) as GameObject;
         if (GameManager.problemName == 'w'.ToString() && itemNumber == GameManager.wcsppInstances[currInstance].startcity)
         {
-            //Debug.Log(GameManager.wcsppInstances[currInstance].startcity);
             instance = Instantiate(StartCityPrefab, itemPosition, Quaternion.identity) as GameObject;
         }
         else if (GameManager.problemName == 'w'.ToString() && itemNumber == GameManager.wcsppInstances[currInstance].endcity)
@@ -673,26 +672,12 @@ public class BoardManager : MonoBehaviour
             if (GameManager.problemName == 't'.ToString())
             {
                 distance.GetComponent<Text>().text = dt.ToString();
-                if (dt > 500)
-                {
-                    distance.GetComponent<Text>().color = new Color(1f, 1f - (dt - 500) / 500f, 0f);
-                }
-                else
-                {
-                    distance.GetComponent<Text>().color = new Color((dt - 100) / 400f, 1f, 0f);
-                }
+                distance.GetComponent<Text>().color = new Color(1f, 1f - (dt - 200f) / 800f, 0f);
             }
             else
             {
                 distance.GetComponent<Text>().text = dt.ToString();
-                if (dt > 500)
-                {
-                    distance.GetComponent<Text>().color = new Color(1f, 1f - (dt - 500) / 500f, 0f);
-                }
-                else
-                {
-                    distance.GetComponent<Text>().color = new Color((dt - 100) / 400f, 1f, 0f);
-                }
+                distance.GetComponent<Text>().color = new Color(1f, 1f - (dt - 200f) / 800f, 0f);
             }
         }
         else if (GameManager.problemName == 'w'.ToString())
@@ -703,35 +688,15 @@ public class BoardManager : MonoBehaviour
             weight.transform.SetParent(canvas.GetComponent<Transform>(), false);
             weight.transform.position = ((coordestination + coordeparture) / 2) - new Vector2(0.23f, 0);
             weight.GetComponent<Text>().text = "$" + wt.ToString();
-            weight.GetComponent<Text>().color = Color.green;
-            /*
-            if (Physics2D.OverlapArea(weight.transform.position + new Vector3(1f, 0.5f), weight.transform.position + new Vector3(-1f, -0.5f), 4))
-            {
-                weight.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(100.23f, 0);
-            }
-            */
+            weight.GetComponent<Text>().color = Color.cyan;
+
             int dt = distances[cityofdeparture, cityofdestination];
             GameObject distance = Instantiate(TextPrefab, new Vector2(0, 0), Quaternion.identity) as GameObject;
             distance.transform.SetParent(canvas.GetComponent<Transform>(), false);
             distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(0.23f, 0);
             distance.GetComponent<Text>().text = "T:" + dt.ToString();
-            if (dt > 500)
-            {
-                distance.GetComponent<Text>().color = new Color(1f, 1f - (dt - 500) / 500f, 0f);
-            }
-            else
-            {
-                distance.GetComponent<Text>().color = new Color((dt - 100) / 400f, 1f, 0f);
-            }
 
-            /*
-            if (Physics2D.OverlapArea(distance.transform.position, distance.transform.position))
-            {
-                Debug.Log("Text Moved");
-                distance.transform.position = ((coordestination + coordeparture) / 2) + new Vector2(1.23f, 0);
-            }*/
-
-            //distance.GetComponent<Text>().color = Color.yellow;
+            distance.GetComponent<Text>().color = new Color(1f, 1f - (dt - 200f) / 800f, 0f);
         }
 
     }

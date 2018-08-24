@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 public class InputOutputManager : MonoBehaviour
@@ -116,7 +117,6 @@ public class InputOutputManager : MonoBehaviour
             {
                 dict.Add(tmp[0], tmp[1]);
             }
-            //Debug.Log(tmp[0] +" "+ tmp[1]);
         }
         sr.Close();
     }
@@ -125,7 +125,7 @@ public class InputOutputManager : MonoBehaviour
     // The instances are stored as tspinstances structs in an array called "tspinstances"
     private static GameManager.TSPInstance[] LoadTSPInstances(int numberOfInstances, string type)
     {
-        GameManager.TSPInstance[] tspInstances = new GameManager.TSPInstance[numberOfInstances];
+        GameManager.TSPInstance[] tempInstances = new GameManager.TSPInstance[numberOfInstances];
 
         for (int k = 0; k < numberOfInstances; k++)
         {
@@ -135,23 +135,21 @@ public class InputOutputManager : MonoBehaviour
             // Use streamreader to read the input files if there are lines to read
             using (StreamReader sr = new StreamReader(folderPathLoadInstances + type + (k + 1) + ".txt"))
             {
-                //Debug.Log(k);
                 ReadToDict(sr, dict);
             }
 
             // Convert (most of them) to integers, with variables and literals being arrays and the others single literals
-            //tspInstances[k].cities = Array.ConvertAll(dict["cities"].Substring(1, dict["cities"].Length - 2).Split(','), int.Parse);
-            tspInstances[k].coordinatesx = Array.ConvertAll(dict["coordinatesx"].Substring(1, dict["coordinatesx"].Length - 2).Split(','), float.Parse);
-            tspInstances[k].coordinatesy = Array.ConvertAll(dict["coordinatesy"].Substring(1, dict["coordinatesy"].Length - 2).Split(','), float.Parse);
+            tempInstances[k].coordinatesx = Array.ConvertAll(dict["coordinatesx"].Substring(1, dict["coordinatesx"].Length - 2).Split(','), float.Parse);
+            tempInstances[k].coordinatesy = Array.ConvertAll(dict["coordinatesy"].Substring(1, dict["coordinatesy"].Length - 2).Split(','), float.Parse);
 
-            tspInstances[k].distancematrix = StringToMatrix(dict["distancevector"]);
+            tempInstances[k].distancematrix = StringToMatrix(dict["distancevector"]);
 
-            tspInstances[k].ncities = int.Parse(dict["ncities"]);
+            tempInstances[k].ncities = int.Parse(dict["ncities"]);
 
-            tspInstances[k].solution = int.Parse(dict["solution"]);
+            tempInstances[k].solution = int.Parse(dict["solution"]);
         }
 
-        return tspInstances;
+        return tempInstances;
     }
 
     // Reads all WCSPP instances from .txt files.
@@ -172,14 +170,6 @@ public class InputOutputManager : MonoBehaviour
             }
 
             // Convert (most of them) to integers, with variables and literals being arrays and the others single literals
-            /*wcsppInstances[k].cities = Array.ConvertAll(dict["cities"].Substring(1, dict["cities"].Length - 2).Split(','), int.Parse);
-
-            foreach (int city in wcsppInstances[k].cities)
-            {
-                wcsppInstances[k].cities[city]++;
-                //Debug.Log(wcsppInstances[k].cities[city]++);
-            }*/
-
             wcsppInstances[k].coordinatesx = Array.ConvertAll(dict["coordinatesx"].Substring(1, dict["coordinatesx"].Length - 2).Split(','), float.Parse);
             wcsppInstances[k].coordinatesy = Array.ConvertAll(dict["coordinatesy"].Substring(1, dict["coordinatesy"].Length - 2).Split(','), float.Parse);
 
@@ -246,7 +236,61 @@ public class InputOutputManager : MonoBehaviour
             {
                 WriteToFile(outputFile, lines2);
             }
+
+            //Saves instance info
+            //an array of string, a new variable called lines3
+            string[] lines3 = new string[4 + GameManager.numberOfInstances];
+            lines3[0] = "PartcipantID:" + participantID;
+            lines3[1] = "RandID:" + randomisationID;
+            lines3[2] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
+            lines3[3] = "instanceNumber;cx;cy;distances;sol;nCities";
+
+            int tspn = 1;
+            GameManager.TSPInstance[] instances;
+
+            if (ID == tspIdentifier)
+            {
+                instances = GameManager.tspInstances;
+            }
+            else
+            {
+                instances = GameManager.mtspInstances;
+            }
+
+            foreach (GameManager.TSPInstance tsp in instances)
+            {
+                lines3[tspn + 3] = tspn + ";" + string.Join(",", tsp.coordinatesx.Select(p => p.ToString()).ToArray()) + ";" + string.Join(",", tsp.coordinatesy.Select(p => p.ToString()).ToArray())
+                    + ";" + MatrixToString(tsp.distancematrix) + ";" + tsp.solution + ";" + tsp.ncities;
+                tspn++;
+            }
+
+            using (StreamWriter outputFile = new StreamWriter(folderPathSave + ID + "InstancesInfo.txt", true))
+            {
+                WriteToFile(outputFile, lines3);
+            }
         }
+    }
+
+    // Helper function that converts distance/weight Strings to Matrix
+    // Each entry in the matrix has the format: [departurecity, destinationcity]
+    private static string MatrixToString(int[,] matrixS)
+    {
+        string arr = "";
+        
+        for (int i = 0; i < matrixS.GetLength(0); i++)
+        {
+            for (int j = 0; j < matrixS.GetLength(1); j++)
+            {
+                arr = arr + matrixS[i, j];
+
+                if (i != (matrixS.GetLength(0)-1) || j != (matrixS.GetLength(1) - 1))
+                {
+                    arr = arr + ",";
+                }
+            }
+        }
+
+        return arr;
     }
 
     // Save headers for the WCSPP problem
@@ -282,6 +326,30 @@ public class InputOutputManager : MonoBehaviour
         using (StreamWriter outputFile = new StreamWriter(folderPathSave + wcsppIdentifier + "Clicks.txt", true))
         {
             WriteToFile(outputFile, lines2);
+        }
+
+
+        //Saves instance info
+        //an array of string, a new variable called lines3
+        string[] lines3 = new string[4 + GameManager.numberOfInstances];
+        lines3[0] = "PartcipantID:" + participantID;
+        lines3[1] = "RandID:" + randomisationID;
+        lines3[2] = "InitialTimeStamp:" + GameFunctions.initialTimeStamp;
+        lines3[3] = "instanceNumber;cx;cy;distances;weights;start;end;sol;max_wt;nCities";
+
+        int tspn = 1;
+        GameManager.WCSPPInstance[] instances = GameManager.wcsppInstances;
+
+        foreach (GameManager.WCSPPInstance wcspp in instances)
+        {
+            lines3[tspn + 3] = tspn + ";" + string.Join(",", wcspp.coordinatesx.Select(p => p.ToString()).ToArray()) + ";" + string.Join(",", wcspp.coordinatesy.Select(p => p.ToString()).ToArray())
+                + ";" + MatrixToString(wcspp.distancematrix) + ";" + MatrixToString(wcspp.weightmatrix) + ";" + wcspp.startcity + ";" + wcspp.endcity + ";" + wcspp.solution + ";" + wcspp.maxweight + ";" + wcspp.ncities;
+            tspn++;
+        }
+
+        using (StreamWriter outputFile = new StreamWriter(folderPathSave + wcsppIdentifier + "InstancesInfo.txt", true))
+        {
+            WriteToFile(outputFile, lines3);
         }
     }
 
