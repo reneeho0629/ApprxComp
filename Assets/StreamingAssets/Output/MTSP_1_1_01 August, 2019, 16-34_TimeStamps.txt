@@ -1,0 +1,4 @@
+PartcipantID:1
+RandID:1
+InitialTimeStamp:16-34-19-029
+block;trial;eventType;elapsedTime

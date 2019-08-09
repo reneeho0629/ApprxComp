@@ -1,0 +1,3 @@
+PartcipantID:1
+RandID:1
+block;trial;timeSpent;itemsSelected;finaldistance;finalweight;instanceNumber;performance;pay;timedOut(Yes,neverValid(1)/Yes,previouslyValid(2)/No(0))

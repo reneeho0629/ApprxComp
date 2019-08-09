@@ -1,0 +1,4 @@
+PartcipantID:1
+RandID:1
+block;trial;timeSpent;itemsSelected;finaldistance;instanceNumber;performance;pay;timedOut(Yes,neverValid(1)/Yes,previouslyValid(2)/No(0))
+0;1;48.85691;0,5,6,2,9,8,4,7,3,1,0;4857;19;0.455836936380482;0.307761485537209;0
