@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+//This is a test for git
 
 public class GameFunctions : MonoBehaviour
 {
